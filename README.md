@@ -9,7 +9,7 @@ Install Discord.py lobary
 python3 -m pip install -U discord.py
 ```
 
-Read here for detailed instructions:[Discord.py](https://pypi.org/project/discord.py/)
+Read here for detailed instructions: [discord.py](https://pypi.org/project/discord.py/)
 
 
 Clone code
