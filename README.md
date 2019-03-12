@@ -1,6 +1,19 @@
 # Flux Discord Bot
 
-Functions to help calculate the resonant frequencies of split ring resonators (SSR).
+The purpose of this project is to create a simple version of IBDD to help others create familiarity with the concept and to be able to test how to would work in practice (and perhaps gain unforseen insite). For the UI, I decided to go with a discord server and to create a ‘Discord bot’ that handles all of the human interactions. The reasons I decided to make the project with Discord include:
+* Existing Libraries for making discord bots
+* Discord already has users
+* Discord allows for a wide range of customisable features (roles, channels, emojis)
+
+The steps I plan to take in order to achieve this are:
+* Become familiar with the discord bot library
+* Auto set-up discord server to become the desired UI for IBDD
+* Develop methods to handle each aspect of IBDD
+* Extend methods to give Discord specific functionality
+
+Although the last point is not required, it would be good to share this project so that communities can manage their servers by making the “Flux Bot” the owner and new discord management decisions can be made collectively via IBDD. For instance, the creation of a new channel may be put to a vote, instead of an owner making all decisions. I imagine that using a flux bot to manage your server it will help create a sense of community ownership.
+
+
 ## Getting Started
 
 Install Discord.py lobary
