@@ -11,6 +11,7 @@ client = commands.Bot(command_prefix = '!')
 
 status = ['Have fun!','VOTE FLUX','Type: !IBDD']
 
+
 async def change_status():
     await client.wait_until_ready()
     msgs = cycle(status)
@@ -30,9 +31,10 @@ ibdd_emojis = ['\u2611','\u274E','\U0001F48E','\U0001F4CA']
 
 @client.event
 async def on_message(message):
-    print("New message")
-    for emoji in ibdd_emojis:
-        await client.add_reaction(message, emoji)
+    print("message.author: " + str(message.author) + "con: "+message.content[:10])
+    if str(message.author) == 'Flux Bot#8753' and message.content[:10] == "**Vote: **":
+        for emoji in ibdd_emojis:
+            await client.add_reaction(message, emoji)
 
     await client.process_commands(message)
 
@@ -73,6 +75,26 @@ async def clear(ctx, amount = 100):
 async def on_member_join(member):
     role = doscord.utils.get(member.server.roles, name = 'Cool People')
     await client.add_roles(member,role)
+
+
+
+@client.event
+async def on_reaction_add(reaction, user):
+    channel = reaction.message.channel
+    if str(user.name) != 'Flux Bot':
+        print(reaction.emoji, user.name)
+        if reaction.emoji == ibdd_emojis[0]:
+            await client.send_message(channel, '{} has voted **YES** {} to the issue: *{}*'.format(user.name, reaction.emoji, reaction.message.content.split('\n')[0][10:]))
+        elif reaction.emoji == ibdd_emojis[1]:
+            await client.send_message(channel, '{} has voted **NO** {} to the issue: *{}*'.format(user.name, reaction.emoji, reaction.message.content.split('\n')[0][10:]))
+        elif reaction.emoji == ibdd_emojis[2]:
+            await client.send_message(channel, '{} has opted to ** Convert vote to Political Capital** {} for the issue: *{}*'.format(user.name, reaction.emoji, reaction.message.content.split('\n')[0][10:]))
+        elif reaction.emoji == ibdd_emojis[3]:
+            await client.send_message(channel, '{} Will **Trade Political Capital for share in vote** {} for the issue: *{}*'.format(user.name, reaction.emoji, reaction.message.content.split('\n')[0][10:]))
+
+
+    #await client.send_message(channel, '{} has added {} to the the message {}'.format(user.name, reaction.emoji, reaction.message.content))
+
 
 #Background task
 

@@ -11,7 +11,7 @@ The steps I plan to take in order to achieve this are:
 * Develop methods to handle each aspect of IBDD
 * Extend methods to give Discord specific functionality
 
-Although the last point is not required, it would be good to share this project so that communities can manage their servers by making the “Flux Bot” the owner and new discord management decisions can be made collectively via IBDD. For instance, the creation of a new channel may be put to a vote, instead of an owner making all decisions. I imagine that using a flux bot to manage your server it will help create a sense of community ownership.
+Although the last point is not required, it would be good to share this project so that communities can manage their servers by making the “Flux Bot” the owner. This way new discord management decisions can be made collectively via IBDD. For instance, the creation of a new channel may be put to a vote, instead of an owner making all decisions. I imagine that using a flux bot to manage your server it will help create a sense of community ownership.
 
 
 ![alt text](https://github.com/KipCrossing/Flux-Discord-Bot/blob/master/Flux-bot-example.png)
