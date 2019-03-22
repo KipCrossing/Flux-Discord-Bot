@@ -35,6 +35,10 @@ async def on_message(message):
     if str(message.author) == 'Flux Bot#8753' and message.content[:10] == "**Vote: **":
         for emoji in ibdd_emojis:
             await client.add_reaction(message, emoji)
+    if str(message.author) == 'Flux Bot#8753' and message.content[:8] == "You will":
+        print("YOU WILLLLLLLLLLLLLL")
+        for emoji in ibdd_emojis[:2]:
+            await client.add_reaction(message, emoji)
 
 
     await client.process_commands(message)
@@ -55,6 +59,15 @@ async def IBDD(ctx, *args):
         await client.say('**Vote for** *{}* **will end in 5 mins**'.format(args[0]))
     else:
         await client.say('*error*')
+
+#write message
+@client.command()
+async def use(*args):
+    output = ''
+    for word in args:
+        output += str(word)
+        output += ' '
+    await client.say("You used {} PC credits".format(output))
 
 
 #Read and write
@@ -89,18 +102,24 @@ async def on_member_join(member):
 
 @client.event
 async def on_reaction_add(reaction, user):
-    channel = reaction.message.channel
+    message = reaction.message
+    channel = message.channel
+    print(message)
     if str(user.name) != 'Flux Bot':
         print(reaction.emoji, user.name)
-        if reaction.emoji == ibdd_emojis[0]:
-            await client.send_message(user, 'You have voted **YES** {} to the issue: *{}*'.format( reaction.emoji, reaction.message.content.split('\n')[0][10:]))
-            print(user)
-        elif reaction.emoji == ibdd_emojis[1]:
-            await client.send_message(user, 'You have voted **NO** {} to the issue: *{}*'.format( reaction.emoji, reaction.message.content.split('\n')[0][10:]))
-        elif reaction.emoji == ibdd_emojis[2]:
-            await client.send_message(user, 'You have opted to ** Convert vote to Political Capital** {} for the issue: *{}*'.format( reaction.emoji, reaction.message.content.split('\n')[0][10:]))
-        elif reaction.emoji == ibdd_emojis[3]:
-            await client.send_message(user, 'You will **Trade Political Capital for share in vote** {} for the issue: *{}*'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:]))
+        if message.content[:10] == "**Vote: **":
+            if reaction.emoji == ibdd_emojis[0]:
+                await client.send_message(user, 'You have voted **YES** {} to the issue: *{}*'.format( reaction.emoji, reaction.message.content.split('\n')[0][10:]))
+                print(user)
+            elif reaction.emoji == ibdd_emojis[1]:
+                await client.send_message(user, 'You have voted **NO** {} to the issue: *{}*'.format( reaction.emoji, reaction.message.content.split('\n')[0][10:]))
+            elif reaction.emoji == ibdd_emojis[2]:
+                await client.send_message(user, 'You have opted to ** Convert vote to Political Capital** {} for the issue: *{}*'.format( reaction.emoji, reaction.message.content.split('\n')[0][10:]))
+            elif reaction.emoji == ibdd_emojis[3]:
+                await client.send_message(user, 'You will **Trade Political Capital for share in vote** {} for the issue: *"{}"*. \nHow would you like to vote?'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:]))
+        elif message.content[:8] == "You will":
+            if reaction.emoji == ibdd_emojis[1] or reaction.emoji == ibdd_emojis[0]:
+                await client.send_message(user,"How much PC whould you like to use? \n Your current balance is **12.65 PC** \n Type: **!use** `[amount]`")
 
 
     #await client.send_message(channel, '{} has added {} to the the message {}'.format(user.name, reaction.emoji, reaction.message.content))
