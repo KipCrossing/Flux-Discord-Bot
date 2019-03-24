@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 import asyncio
 from itertools import cycle
+from ibdd import IssueBasedDD
 
 
 TOKEN = 'SECRETE!'
@@ -10,6 +11,7 @@ TOKEN = 'SECRETE!'
 client = commands.Bot(command_prefix = '!')
 
 status = ['Have fun!','VOTE FLUX','Type: !IBDD']
+
 
 
 async def change_status():
@@ -51,6 +53,8 @@ async def IBDD(ctx, *args):
     if len(args) == 0:
         await client.say('**To create an IBDD issue to be voted on type: ** \n !IBDD "Issue to be voted on"')
     elif len(args) == 1:
+        global new_ibdd
+        new_ibdd = IssueBasedDD(str(args[0]))
         if server:
             for member in server.members:
                 if 'Flux Bot#8753' != str(member):
@@ -104,13 +108,12 @@ async def on_member_join(member):
 async def on_reaction_add(reaction, user):
     message = reaction.message
     channel = message.channel
-    print(message)
     if str(user.name) != 'Flux Bot':
         print(reaction.emoji, user.name)
         if message.content[:10] == "**Vote: **":
             if reaction.emoji == ibdd_emojis[0]:
                 await client.send_message(user, 'You have voted **YES** {} to the issue: *{}*'.format( reaction.emoji, reaction.message.content.split('\n')[0][10:]))
-                print(user)
+                new_ibdd.vote_yes(user)
             elif reaction.emoji == ibdd_emojis[1]:
                 await client.send_message(user, 'You have voted **NO** {} to the issue: *{}*'.format( reaction.emoji, reaction.message.content.split('\n')[0][10:]))
             elif reaction.emoji == ibdd_emojis[2]:
