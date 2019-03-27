@@ -1,4 +1,5 @@
 print("Flux Discord Bot")
+import os
 import discord
 from discord.ext import commands
 import asyncio
@@ -6,7 +7,7 @@ from itertools import cycle
 from ibdd import IssueBasedDD
 
 
-TOKEN = 'SECRETE!'
+TOKEN = os.environ['IBDD_DISCORD_BOT_TOKEN']
 
 client = commands.Bot(command_prefix = '!')
 
@@ -26,6 +27,12 @@ async def change_status():
 async def on_ready():
     await client.change_presence(game = discord.Game(name='Type: !IBDD'))
     print('Bot ready!')
+    server_id = '551999201714634752'
+    server = client.get_server(server_id)
+    if server:
+        print("Yes")
+    else:
+        print("No")
 
 
 #unicode form http://www.fileformat.info/info/unicode/char/274e/index.htm
@@ -49,6 +56,9 @@ async def on_message(message):
 @client.command(pass_context = True)
 async def IBDD(ctx, *args):
     server_id = ctx.message.server.id
+    print("Server ID")
+    print(server_id)
+    print(type(server_id))
     server = client.get_server(id = server_id)
     if len(args) == 0:
         await client.say('**To create an IBDD issue to be voted on type: ** \n !IBDD "Issue to be voted on"')
