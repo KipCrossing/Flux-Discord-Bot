@@ -45,7 +45,7 @@ async def on_message(message):
         for emoji in ibdd_emojis:
             await client.add_reaction(message, emoji)
     if str(message.author) == 'Flux Bot#8753' and message.content[:8] == "You will":
-        print("YOU WILLLLLLLLLLLLLL")
+        print("YOU WILLL")
         for emoji in ibdd_emojis[:2]:
             await client.add_reaction(message, emoji)
 
