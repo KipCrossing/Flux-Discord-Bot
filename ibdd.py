@@ -13,19 +13,19 @@ class IssueBasedDD(object):
         f.close()
 
         f_y = open(self.dir_name + '/yes.csv', "w+")
-        f_y.write("0\n")
+        f_y.write("0")
         f_y.close()
 
         f_n = open(self.dir_name + '/no.csv', "w+")
-        f_n.write("0\n")
+        f_n.write("0")
         f_n.close()
 
         pc_y = open(self.dir_name + '/pc_yes.csv', "w+")
-        pc_y.write("0\n")
+        pc_y.write("0")
         pc_y.close()
 
         pc_n = open(self.dir_name + '/pc_no.csv', "w+")
-        pc_n.write("0\n")
+        pc_n.write("0")
         pc_n.close()
 
     def vote(self, user):
@@ -42,7 +42,8 @@ class IssueBasedDD(object):
             f.close()
 
     def vote_yes(self, user):
-        self.vote(user)
+        # self.vote(user)
+        self.add_one(self.dir_name + '/yes.csv')
 
     def vote_no(self, user):
         self.vote(user)
@@ -71,3 +72,12 @@ class IssueBasedDD(object):
         f = open(self.file_name, 'r')
         for line in f:
             vote_info_list = line.split(',')
+
+    def add_one(self, file):
+        f = open(file, 'r')
+        for line in f:
+            num = int(line)
+        num += 1
+        f.close()
+        f = open(file, 'w')
+        f.write(str(num))

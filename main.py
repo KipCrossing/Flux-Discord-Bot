@@ -71,7 +71,8 @@ async def IBDD(ctx, *args):
         await ctx.send('**To create an IBDD issue to be voted on type: ** \n !IBDD "Issue to be voted on"')
     elif len(args) == 1:
         global new_ibdd
-        # new_ibdd = IssueBasedDD(str(args[0]))
+        print(args[0])
+        new_ibdd = IssueBasedDD(str(args[0]))
         if server:
             for member in server.members:
                 if 'Flux Bot#8753' != str(member) and 'Flux Projects#3812' != str(member):
@@ -131,7 +132,9 @@ async def on_reaction_add(reaction, user):
         if message.content[:10] == "**Vote: **":
             if reaction.emoji == ibdd_emojis[0]:
                 await user.send('You have voted **YES** {} to the issue: *{}*'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:]))
-                # new_ibdd.vote_yes(user)
+                print(user.id)
+                print(user.name)
+                new_ibdd.vote_yes(user.id)
             elif reaction.emoji == ibdd_emojis[1]:
                 await user.send('You have voted **NO** {} to the issue: *{}*'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:]))
             elif reaction.emoji == ibdd_emojis[2]:
