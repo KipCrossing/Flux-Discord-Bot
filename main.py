@@ -37,10 +37,10 @@ async def on_ready():
         print("No")
     user = await client.fetch_user("449910203220099073")
 
-    await user.send(" hello , i'm awake")
-    # await user.send( " hello , i'm awake")
+    await user.send("Hello , i'm awake")
+
     print(user)
-    # await user.send("yo")
+
 
 # unicode form http://www.fileformat.info/info/unicode/char/274e/index.htm
 ibdd_emojis = ['\u2611', '\u274E', '\U0001F48E', '\U0001F4CA']
