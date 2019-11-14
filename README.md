@@ -33,18 +33,6 @@ Clone code
 git clone https://github.com/KipCrossing/Flux-Discord-Bot
 ```
 
-### Usage
-
-```python
-from ... import ...
-```
-
-Example:
-
-```python
-print('test')
-```
-
 ## Acknowledgements
 
 Written By Kipling Crossing
