@@ -131,15 +131,19 @@ async def on_reaction_add(reaction, user):
         print(reaction.emoji, user.name)
         if message.content[:10] == "**Vote: **":
             if reaction.emoji == ibdd_emojis[0]:
+                await message.remove_reaction(ibdd_emojis[1], message.author)
                 await user.send('You have voted **YES** {} to the issue: *{}*'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:]))
                 print(user.id)
                 print(user.name)
                 new_ibdd.vote_yes(user.id)
             elif reaction.emoji == ibdd_emojis[1]:
+                await message.remove_reaction(ibdd_emojis[0], message.author)
                 await user.send('You have voted **NO** {} to the issue: *{}*'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:]))
             elif reaction.emoji == ibdd_emojis[2]:
+                await message.remove_reaction(ibdd_emojis[3], message.author)
                 await user.send('You have opted to ** Convert vote to Political Capital** {} for the issue: *{}*'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:]))
             elif reaction.emoji == ibdd_emojis[3]:
+                await message.remove_reaction(ibdd_emojis[2], message.author)
                 await user.send('You will **Trade Political Capital for share in vote** {} for the issue: *"{}"*. \nHow would you like to vote?'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:]))
         elif message.content[:8] == "You will":
             if reaction.emoji == ibdd_emojis[1] or reaction.emoji == ibdd_emojis[0]:
