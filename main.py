@@ -63,16 +63,25 @@ async def on_message(message):
 @client.command(pass_context=True)
 async def IBDD(ctx, *args):
     server_id = ctx.message.guild.id
+    channel_id = ctx.message.channel.id
+    message_id = ctx.message.id
     print("Server ID")
     print(server_id)
-    print(type(server_id))
+    print("Channel ID")
+    print(channel_id)
+    print("Message ID")
+    print(message_id)
     server = client.get_guild(id=server_id)
+    channel = client.get_channel(channel_id)
+    message = await channel.fetch_message(message_id)
+    print(message.content)
     if len(args) == 0:
         await ctx.send('**To create an IBDD issue to be voted on type: ** \n !IBDD "Issue to be voted on"')
     elif len(args) == 1:
+        issue_id = str(server_id) + '-' + str(channel_id) + '-' + str(message_id)
         global new_ibdd
         print(args[0])
-        new_ibdd = IssueBasedDD(str(args[0]))
+        new_ibdd = IssueBasedDD(issue_id, str(args[0]))
         if server:
             for member in server.members:
                 if 'Flux Bot#8753' != str(member) and 'Flux Projects#3812' != str(member):
@@ -131,6 +140,7 @@ async def on_reaction_add(reaction, user):
         print(reaction.emoji, user.name)
         if message.content[:10] == "**Vote: **":
             if reaction.emoji == ibdd_emojis[0]:
+                await message.remove_reaction(ibdd_emojis[0], message.author)
                 await message.remove_reaction(ibdd_emojis[1], message.author)
                 await message.remove_reaction(ibdd_emojis[2], message.author)
                 await user.send('You have voted **YES** {} to the issue: *{}*'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:]))
@@ -139,18 +149,24 @@ async def on_reaction_add(reaction, user):
                 new_ibdd.vote_yes(user.id)
             elif reaction.emoji == ibdd_emojis[1]:
                 await message.remove_reaction(ibdd_emojis[0], message.author)
+                await message.remove_reaction(ibdd_emojis[1], message.author)
                 await message.remove_reaction(ibdd_emojis[2], message.author)
                 await user.send('You have voted **NO** {} to the issue: *{}*'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:]))
             elif reaction.emoji == ibdd_emojis[2]:
                 await message.remove_reaction(ibdd_emojis[3], message.author)
                 await message.remove_reaction(ibdd_emojis[1], message.author)
+                await message.remove_reaction(ibdd_emojis[2], message.author)
                 await message.remove_reaction(ibdd_emojis[0], message.author)
                 await user.send('You have opted to ** Convert vote to Political Capital** {} for the issue: *{}*'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:]))
             elif reaction.emoji == ibdd_emojis[3]:
-                await user.send('You will **Trade Political Capital for share in vote** {} for the issue: *"{}"*. \nHow would you like to vote?'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:]))
+                await user.send('You will **Trade Political Capital for share in vote** {} for the issue: \n*"{}"* \nHow would you like to vote?'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:]))
         elif message.content[:8] == "You will":
+            the_issue = message.content.split("\n")[1].replace('*', '').replace('"', '')
+            print(the_issue)
             if reaction.emoji == ibdd_emojis[1] or reaction.emoji == ibdd_emojis[0]:
-                await user.send("How much PC whould you like to use? \n Your current balance is **12.65 PC** \n Type: **!use** `[amount]`")
+                await message.remove_reaction(ibdd_emojis[0], message.author)
+                await message.remove_reaction(ibdd_emojis[1], message.author)
+                await user.send('How much PC whould you like use to vote {} for the issue \n*"{}"*\nYour current balance is **12.65 PC** \nType: **!use** `[amount]`'.format(reaction.emoji, the_issue))
 
     # await client.send_message(channel, '{} has added {} to the the message {}'.format(user.name, reaction.emoji, reaction.message.content))
 

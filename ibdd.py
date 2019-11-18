@@ -3,10 +3,15 @@ import os
 
 class IssueBasedDD(object):
 
-    def __init__(self, issue):
+    def __init__(self, issueid, issue):
         self.issue = issue
-        self.dir_name = self.issue.replace(" ", "_")
+        self.issueid = issueid
+        self.dir_name = self.issueid
         os.mkdir(self.dir_name)
+
+        f = open(self.dir_name + '/issue.txt', "w")
+        f.write(self.issue)
+        f.close()
 
         f = open(self.dir_name + '/records.csv', "w+")
         f.write("user\n")
