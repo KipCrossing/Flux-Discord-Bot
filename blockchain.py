@@ -34,7 +34,7 @@ class Block:
 
 class Blockchain:
 
-    diff = 27
+    diff = 24
     maxNonce = 2**32
     target = 2 ** (256-diff)
 
@@ -85,17 +85,17 @@ class Blockchain:
 
 blockchain = Blockchain()
 
-while True:
-    new_data = 'new_data.txt'
-    if new_data in os.listdir():
-        f = open(new_data, 'r')
-        data = ''
-        for line in f:
-            data = line
-        f.close()
-        # os.remove(new_data)
-        print(datetime.datetime.now())
-        blockchain.mine(Block(data))
+# while True:
+#     new_data = 'new_data.txt'
+#     if new_data in os.listdir():
+#         f = open(new_data, 'r')
+#         data = ''
+#         for line in f:
+#             data = line
+#         f.close()
+#         # os.remove(new_data)
+#         print(datetime.datetime.now())
+#         blockchain.mine(Block(data))
 
 
 # while blockchain.head != None:

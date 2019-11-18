@@ -1,5 +1,0 @@
-Block Hash: 95ecd20cd90ee0fabf5c5acbebd9ec44544d65e30bb03368b406fa58775bddf6
-BlockNo: 205
-Block Data: New data....
-
---------------
