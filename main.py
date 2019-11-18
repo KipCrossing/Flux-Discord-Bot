@@ -4,7 +4,7 @@ import asyncio
 from discord.ext import commands
 import discord
 import os
-from blockchain import Blockchain
+from blockchain import Blockchain, Block
 print("Flux Discord Bot")
 
 blockchain = Blockchain()
@@ -25,18 +25,28 @@ async def get_issue(issue_id):
     return(message.content.replace('!IBDD ', '').replace('"', ''))
 
 
-async def change_status():
-    # Get this running in background
+async def update_blockchain():
     await client.wait_until_ready()
-    while not client.is_closed:
-
-        blockchain.mine(Block(current_status))
+    while not client.is_closed():
+        new_data = 'new_data.txt'
+        if new_data in os.listdir():
+            f = open(new_data, 'r')
+            data = ''
+            for line in f:
+                data = line
+            f.close()
+            blockchain.mine(Block(data))
+            os.remove(new_data)
+            server = client.get_guild(id=551999201714634752)
+            channel = client.get_channel(645889124817043457)
+            await channel.send(blockchain.block)
+        await asyncio.sleep(5)
 
 
 @client.event
 async def on_ready():
-    game = discord.Game(name='Type: !IBDD')
-    await client.change_presence(status=discord.Status.idle, activity=game)
+    # game = discord.Game(name='Type: !IBDD')
+    # await client.change_presence(status=discord.Status.idle, activity=game)
     print('Bot ready!')
     server_id = '551999201714634752'
     server = client.get_guild(server_id)
@@ -102,15 +112,18 @@ async def IBDD(ctx, *args):
 # write message
 @client.command()
 async def use(ctx, *args):
-    output = args[0]
+    new_data = 'new_data.txt'
+    use_ammount = float(args[0])
     issue_id = args[1]
     issue_message = await get_issue(issue_id)
+    user = ctx.message.author.id
+    current_bal = 50.22  # make function to get new bal
+    new_bal = current_bal - use_ammount
     print(issue_message)
-    await ctx.send("You used {} PC credits\n`{}`".format(output, issue_id))
-    server
-    issue
-    users
-    amount
+    f = open(new_data, 'a+')
+    f.write('["{}","{}",{},{}],'.format(user, issue_id, use_ammount, new_bal))
+    f.close()
+    await ctx.send("You used {} PC credits\n`{}`".format(use_ammount, issue_id))
 
 
 # Read and write
@@ -188,5 +201,5 @@ async def on_reaction_add(reaction, user):
 # Background task
 
 
-client.loop.create_task(change_status())
+client.loop.create_task(update_blockchain())
 client.run(TOKEN)

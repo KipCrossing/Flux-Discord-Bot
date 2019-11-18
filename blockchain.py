@@ -34,7 +34,7 @@ class Block:
 
 class Blockchain:
 
-    diff = 24
+    diff = 22
     maxNonce = 2**32
     target = 2 ** (256-diff)
 
@@ -52,9 +52,9 @@ class Blockchain:
         f.close()
     else:
         block = Block("Genesis")
-        f = open('blockchain.txt', 'a+')
-        f.write(str(block))
-        f.close()
+        # f = open('blockchain.txt', 'a+')
+        # f.write(str(block))
+        # f.close()
     dummy = head = block
 
     def add(self, block):
@@ -66,9 +66,9 @@ class Blockchain:
 
         self.block.next = block
         self.block = self.block.next
-        f = open('blockchain.txt', 'a')
-        f.write(str(self.block))
-        f.close()
+        # f = open('blockchain.txt', 'a')
+        # f.write(str(self.block))
+        # f.close()
         f = open('lastblock.txt', 'w')
         f.write(str(self.block))
         f.close()
