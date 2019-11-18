@@ -5,6 +5,8 @@ from discord.ext import commands
 import discord
 import os
 from blockchain import Blockchain, Block
+import ast
+
 print("Flux Discord Bot")
 
 blockchain = Blockchain()
@@ -23,6 +25,48 @@ async def get_issue(issue_id):
     channel = client.get_channel(int(issue_data[1]))
     message = await channel.fetch_message(int(issue_data[2]))
     return(message.content.replace('!IBDD ', '').replace('"', ''))
+
+
+async def get_balance(blockchain_id):
+    server = client.get_guild(id=551999201714634752)
+    channel = client.get_channel(645889124817043457)
+    messages = []
+    counter = 0
+    current_bal = None
+    async for message in channel.history(limit=None, oldest_first=False):
+        try:
+            data = message.content.split('\n')[2].replace('Block Data: ', '')[:-1]
+            data = '[' + data + ']'
+            data = ast.literal_eval(data)
+            should_break = False
+            for t in data:
+                if t[0] == str(blockchain_id):
+                    print(t)
+                    print('Current bal: {}'.format(t[3]))
+                    current_bal = float(t[3])
+                    should_break = True
+            if should_break:
+                break
+        except:
+            print('Bad data')
+            current_bal = None
+    return(current_bal)
+
+
+async def block_data(sender, receiver, amount, bal):
+    if bal:
+        new_bal = bal - amount
+        if new_bal >= 0:
+            new_data = 'new_data.txt'
+            f = open(new_data, 'a+')
+            # [sender_user_id, receiver_id, transver_amount, sender_new_bal]
+            f.write('["{}","{}","{}","{}"],'.format(sender, receiver, amount, new_bal))
+            f.close()
+            return(True)
+        else:
+            return(False)
+    else:
+        return(False)
 
 
 async def update_blockchain():
@@ -112,18 +156,19 @@ async def IBDD(ctx, *args):
 # write message
 @client.command()
 async def use(ctx, *args):
-    new_data = 'new_data.txt'
-    use_ammount = float(args[0])
+
+    use_amount = float(args[0])
     issue_id = args[1]
     issue_message = await get_issue(issue_id)
     user = ctx.message.author.id
-    current_bal = 50.22  # make function to get new bal
-    new_bal = current_bal - use_ammount
+    current_bal = await get_balance(user)
     print(issue_message)
-    f = open(new_data, 'a+')
-    f.write('["{}","{}",{},{}],'.format(user, issue_id, use_ammount, new_bal))
-    f.close()
-    await ctx.send("You used {} PC credits\n`{}`".format(use_ammount, issue_id))
+    block_check = await block_data(user, issue_id, use_amount, current_bal)
+    #############
+    if block_check:
+        await ctx.send("You used {} PC credits\nBalance: `{}`\n`{}`".format(use_amount, current_bal-use_amount, issue_id))
+    else:
+        await ctx.send("**You do not have enough balance.** Current balance: `{}`".format(current_bal))
 
 
 # Read and write
