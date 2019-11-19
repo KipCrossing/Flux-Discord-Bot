@@ -111,6 +111,7 @@ async def update_blockchain():
 
 @client.event
 async def on_ready():
+    # await give_balance(313952769541406720, 100)
     # game = discord.Game(name='Type: !IBDD')
     # await client.change_presence(status=discord.Status.idle, activity=game)
     print('Bot ready!')
