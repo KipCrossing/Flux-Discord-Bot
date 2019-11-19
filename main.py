@@ -27,6 +27,23 @@ async def get_issue(issue_id):
     return(message.content.replace('!IBDD ', '').replace('"', ''))
 
 
+async def send_pc():
+    server_id = 551999201714634752
+    voter_id = 449910203220099073
+    await block_data(server_id, voter_id, 100)
+
+
+async def give_balance(receiver_id, amount):
+    server_id = 551999201714634752
+    server_bal = await get_balance(server_id)
+    new_data = 'new_data.txt'
+    f = open(new_data, 'a+')
+    # [sender_user_id, receiver_id, transver_amount, sender_new_bal]
+    f.write('["{}","{}","{}","{}","{}"],'.format(
+        server_id, receiver_id, amount, server_bal, amount))
+    f.close()
+
+
 async def get_balance(blockchain_id):
     server = client.get_guild(id=551999201714634752)
     channel = client.get_channel(645889124817043457)
@@ -45,6 +62,10 @@ async def get_balance(blockchain_id):
                     print('Current bal: {}'.format(t[3]))
                     current_bal = float(t[3])
                     should_break = True
+                elif t[1] == str(blockchain_id):
+                    print('id here')
+                    current_bal = float(t[4])
+                    should_break = True
             if should_break:
                 break
         except:
@@ -53,18 +74,19 @@ async def get_balance(blockchain_id):
     return(current_bal)
 
 
-async def block_data(sender, receiver, amount, bal):
-    if bal:
-        new_bal = bal - amount
-        if new_bal >= 0:
-            new_data = 'new_data.txt'
-            f = open(new_data, 'a+')
-            # [sender_user_id, receiver_id, transver_amount, sender_new_bal]
-            f.write('["{}","{}","{}","{}"],'.format(sender, receiver, amount, new_bal))
-            f.close()
-            return(True)
-        else:
-            return(False)
+async def block_data(sender, receiver, amount):
+    s_bal = await get_balance(sender)
+    r_bal = await get_balance(receiver)
+    sender_bal = s_bal - amount
+    receiver_bal = r_bal + amount
+    if sender_bal >= 0:
+        new_data = 'new_data.txt'
+        f = open(new_data, 'a+')
+        # [sender_user_id, receiver_id, transver_amount, sender_new_bal]
+        f.write('["{}","{}","{}","{}","{}"],'.format(
+            sender, receiver, amount, sender_bal, receiver_bal))
+        f.close()
+        return(True)
     else:
         return(False)
 
@@ -112,13 +134,16 @@ ibdd_emojis = ['\u2611', '\u274E', '\U0001F48E', '\U0001F4CA']
 @client.event
 async def on_message(message):
     # print("message.author: " + str(message.author) + "con: "+message.content[:10])
-    if str(message.author) == 'Flux Bot#8753' and message.content[:10] == "**Vote: **":
-        for emoji in ibdd_emojis:
-            await message.add_reaction(emoji)
-    if str(message.author) == 'Flux Bot#8753' and message.content[:8] == "You will":
-        # print("YOU WILLL")
-        for emoji in ibdd_emojis[:2]:
-            await message.add_reaction(emoji)
+    try:
+        if str(message.author) == 'Flux Bot#8753' and message.content[:10] == "**Vote: **":
+            for emoji in ibdd_emojis:
+                await message.add_reaction(emoji)
+        if str(message.author) == 'Flux Bot#8753' and message.content[:8] == "You will":
+            # print("YOU WILLL")
+            for emoji in ibdd_emojis[:2]:
+                await message.add_reaction(emoji)
+    except Exception as e:
+        print('Fail\n\n{}\n\n'.format(e))
 
     await client.process_commands(message)
 
@@ -136,6 +161,7 @@ async def IBDD(ctx, *args):
         await ctx.send('**To create an IBDD issue to be voted on type: ** \n !IBDD "Issue to be voted on"')
     elif len(args) == 1:
         issue_id = str(server_id) + '-' + str(channel_id) + '-' + str(message_id)
+        await give_balance(issue_id, 0)
         # global new_ibdd
         print(args[0])
         if not issue_id in os.listdir():
@@ -145,7 +171,8 @@ async def IBDD(ctx, *args):
         # new_ibdd = IssueBasedDD(issue_id, str(args[0]))
         if server:
             for member in server.members:
-                if 'Flux Bot#8753' != str(member) and 'Flux Projects#3812' != str(member):
+                dont_send = ['Flux Bot#8753', 'Flux Projects#3812', 'XertroV#9931']
+                if not str(member) in dont_send:
                     print('name: {}'.format(member))
                     await member.send('**Vote: **' + str(args[0])+'\n:ballot_box_with_check: YES \n:negative_squared_cross_mark: NO \n:gem: Convert vote to Political Capital \n:bar_chart:  Trade Political Capital for share in vote\n`{}`'.format(issue_id))
                     # await client.send_message(member, '**Vote: **' + str(args[0])+'\n:ballot_box_with_check: YES \n:negative_squared_cross_mark: NO \n:gem: Convert vote to Political Capital \n:bar_chart:  Trade Political Capital for share in vote')
@@ -159,14 +186,14 @@ async def use(ctx, *args):
 
     use_amount = float(args[0])
     issue_id = args[1]
+    server_id = 551999201714634752
     issue_message = await get_issue(issue_id)
     user = ctx.message.author.id
-    current_bal = await get_balance(user)
     print(issue_message)
-    block_check = await block_data(user, issue_id, use_amount, current_bal)
+    block_check = await block_data(user, server_id, use_amount)
     #############
     if block_check:
-        await ctx.send("You used {} PC credits\nBalance: `{}`\n`{}`".format(use_amount, current_bal-use_amount, issue_id))
+        await ctx.send("You used {} PC credits\n`{}`".format(use_amount, issue_id))
     else:
         await ctx.send("**You do not have enough balance.** Current balance: `{}`".format(current_bal))
 
@@ -181,6 +208,15 @@ async def echo(*args):
     await client.say(output)
 
 
+@client.command(pass_context=True)
+async def mybal(ctx):
+    channel = ctx.message.channel
+    user = ctx.message.author.id
+    bal = await get_balance(user)
+    print(user, bal)
+
+    await channel.send('Your bal: `{}`'.format(bal))
+
 # Delete messages
 @client.command(pass_context=True)
 async def clear(ctx, amount=100):
@@ -188,10 +224,10 @@ async def clear(ctx, amount=100):
         channel = ctx.message.channel
         messages = []
         counter = 0
-        async for message in client.logs_from(channel, limit=int(amount)):
+        async for message in channel.history(limit=100):
             messages.append(message)
-        await client.delete_messages(messages)
-        await client.say('Messages deleted')
+        await channel.delete_messages(messages)
+        # await client.say('Messages deleted')
 
 
 # assign Roles
