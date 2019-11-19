@@ -2,8 +2,6 @@ import datetime
 import hashlib
 import os
 
-print(os.listdir())
-
 
 class Block:
     blockNo = 0
@@ -80,5 +78,14 @@ class Blockchain:
             else:
                 block.nonce += 1
 
+
+def check_hash(data, previous_hash, blockNo):
+    h = hashlib.sha256()
+    h.update(
+        str(data).encode('utf-8') +
+        str(previous_hash).encode('utf-8') +
+        str(blockNo).encode('utf-8')
+    )
+    return h.hexdigest()
 
 # blockchain = Blockchain()
