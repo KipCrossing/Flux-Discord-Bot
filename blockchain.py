@@ -18,8 +18,10 @@ class Block:
     def hash(self):
         h = hashlib.sha256()
         h.update(
+            str(self.nonce).encode('utf-8') +
             str(self.data).encode('utf-8') +
             str(self.previous_hash).encode('utf-8') +
+            str(self.timestamp).encode('utf-8') +
             str(self.blockNo).encode('utf-8')
         )
         return h.hexdigest()
@@ -30,7 +32,7 @@ class Block:
 
 class Blockchain:
 
-    diff = 22
+    diff = 20
     maxNonce = 2**32
     target = 2 ** (256-diff)
 
@@ -79,13 +81,13 @@ class Blockchain:
                 block.nonce += 1
 
 
-def check_hash(data, previous_hash, blockNo):
-    h = hashlib.sha256()
-    h.update(
-        str(data).encode('utf-8') +
-        str(previous_hash).encode('utf-8') +
-        str(blockNo).encode('utf-8')
-    )
-    return h.hexdigest()
+# def check_hash(data, previous_hash, blockNo):
+#     h = hashlib.sha256()
+#     h.update(
+#         str(data).encode('utf-8') +
+#         str(previous_hash).encode('utf-8') +
+#         str(blockNo).encode('utf-8')
+#     )
+#     return h.hexdigest()
 
 # blockchain = Blockchain()
