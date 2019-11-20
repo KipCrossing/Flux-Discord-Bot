@@ -14,9 +14,22 @@ blockchain = Blockchain()
 
 TOKEN = os.environ['IBDD_DISCORD_BOT_TOKEN']
 
+
 client = commands.Bot(command_prefix='!')
 
 status = ['Have fun!', 'VOTE FLUX', 'Type: !IBDD']
+# unicode form http://www.fileformat.info/info/unicode/char/274e/index.htm
+ibdd_emojis = ['\u2611', '\u274E', '\U0001F48E', '\U0001F4CA']
+SERVER_ID = 551999201714634752
+BLOCKCHAIN_CH_ID = 645889124817043457
+USER_ME_ID = 449910203220099073
+FLUX_BOT_ID = 551997414978879499
+VOTER = 'Voter'
+NOTE_TRANSFER = 'TRANSFER'
+NOTE_LOAD = 'LOAD'
+NOTE_YES = 'YES'
+NOTE_NO = 'NO'
+NEW_DATA = 'new_data.txt'
 
 
 async def get_issue(issue_id):
@@ -27,26 +40,24 @@ async def get_issue(issue_id):
     return(message.content.replace('!IBDD ', '').replace('"', ''))
 
 
-async def send_pc():
-    server_id = 551999201714634752
-    voter_id = 449910203220099073
-    await block_data(server_id, voter_id, 100)
+async def send_pc(voter_id, amount):
+    server_id = SERVER_ID
+    await block_data(server_id, voter_id, amount, NOTE_TRANSFER)
 
 
-async def give_balance(receiver_id, amount):
-    server_id = 551999201714634752
+async def load_balance(receiver_id, amount):
+    server_id = SERVER_ID
     server_bal = await get_balance(server_id)
-    new_data = 'new_data.txt'
-    f = open(new_data, 'a+')
+    f = open(NEW_DATA, 'a+')
     # [sender_user_id, receiver_id, transver_amount, sender_new_bal]
-    f.write('["{}","{}","{}","{}","{}"],'.format(
-        server_id, receiver_id, amount, server_bal, amount))
+    f.write('["{}","{}","{}","{}","{}","{}"],'.format(
+        server_id, receiver_id, amount, server_bal, amount, NOTE_LOAD))
     f.close()
 
 
 async def get_balance(blockchain_id):
-    server = client.get_guild(id=551999201714634752)
-    channel = client.get_channel(645889124817043457)
+    server = client.get_guild(id=SERVER_ID)
+    channel = client.get_channel(BLOCKCHAIN_CH_ID)
     messages = []
     counter = 0
     current_bal = None
@@ -57,7 +68,7 @@ async def get_balance(blockchain_id):
             data = ast.literal_eval(data)
             should_break = False
             for t in data:
-                if t[0] == str(blockchain_id):
+                if t[0] == str(blockchain_id) and t[5]:
                     print(t)
                     print('Current bal: {}'.format(t[3]))
                     current_bal = float(t[3])
@@ -68,23 +79,23 @@ async def get_balance(blockchain_id):
                     should_break = True
             if should_break:
                 break
-        except:
-            print('Bad data')
+        except Exception as e:
+            print('Bad data: ', e)
             current_bal = None
     return(current_bal)
 
 
-async def block_data(sender, receiver, amount):
+async def block_data(sender, receiver, amount, note):
     s_bal = await get_balance(sender)
     r_bal = await get_balance(receiver)
+    print(s_bal, r_bal, amount)
     sender_bal = s_bal - amount
     receiver_bal = r_bal + amount
     if sender_bal >= 0:
-        new_data = 'new_data.txt'
-        f = open(new_data, 'a+')
+        f = open(NEW_DATA, 'a+')
         # [sender_user_id, receiver_id, transver_amount, sender_new_bal]
-        f.write('["{}","{}","{}","{}","{}"],'.format(
-            sender, receiver, amount, sender_bal, receiver_bal))
+        f.write('["{}","{}","{}","{}","{}","{}"],'.format(
+            sender, receiver, amount, sender_bal, receiver_bal, note))
         f.close()
         return(True)
     else:
@@ -92,57 +103,56 @@ async def block_data(sender, receiver, amount):
 
 
 async def update_blockchain():
+    print('Update blockchain')
     await client.wait_until_ready()
+    print(client.is_closed())
     while not client.is_closed():
-        new_data = 'new_data.txt'
-        if new_data in os.listdir():
-            f = open(new_data, 'r')
+        if NEW_DATA in os.listdir():
+            f = open(NEW_DATA, 'r')
             data = ''
             for line in f:
                 data = line
             f.close()
             blockchain.mine(Block(data))
-            os.remove(new_data)
-            server = client.get_guild(id=551999201714634752)
-            channel = client.get_channel(645889124817043457)
+            os.remove(NEW_DATA)
+            server = client.get_guild(id=SERVER_ID)
+            channel = client.get_channel(BLOCKCHAIN_CH_ID)
             await channel.send(blockchain.block)
         await asyncio.sleep(5)
 
 
 @client.event
 async def on_ready():
-    # await give_balance(313952769541406720, 100)
+    # await load_balance(USER_ME_ID, 100)
     # game = discord.Game(name='Type: !IBDD')
     # await client.change_presence(status=discord.Status.idle, activity=game)
     print('Bot ready!')
-    server_id = '551999201714634752'
+    server_id = SERVER_ID
     server = client.get_guild(server_id)
     if server:
-        print("Yes")
+        print("Connected")
     else:
-        print("No")
-    user = await client.fetch_user("449910203220099073")
-
+        print("NOT connected")
+    user = await client.fetch_user(USER_ME_ID)
     await user.send("Hello , i'm awake")
-
     print(user)
-
-
-# unicode form http://www.fileformat.info/info/unicode/char/274e/index.htm
-ibdd_emojis = ['\u2611', '\u274E', '\U0001F48E', '\U0001F4CA']
 
 
 @client.event
 async def on_message(message):
     # print("message.author: " + str(message.author) + "con: "+message.content[:10])
     try:
-        if str(message.author) == 'Flux Bot#8753' and message.content[:10] == "**Vote: **":
+        if message.author.id == FLUX_BOT_ID and message.content[:10] == "**Vote: **":
             for emoji in ibdd_emojis:
                 await message.add_reaction(emoji)
-        if str(message.author) == 'Flux Bot#8753' and message.content[:8] == "You will":
+        if message.author.id == FLUX_BOT_ID and message.content[:8] == "You will":
             # print("YOU WILLL")
             for emoji in ibdd_emojis[:2]:
                 await message.add_reaction(emoji)
+        if message.author.id == FLUX_BOT_ID and message.content[:8] == "Amount t":
+            for emoji in ibdd_emojis[:2]:
+                await message.add_reaction(emoji)
+
     except Exception as e:
         print('Fail\n\n{}\n\n'.format(e))
 
@@ -162,7 +172,7 @@ async def IBDD(ctx, *args):
         await ctx.send('**To create an IBDD issue to be voted on type: ** \n !IBDD "Issue to be voted on"')
     elif len(args) == 1:
         issue_id = str(server_id) + '-' + str(channel_id) + '-' + str(message_id)
-        await give_balance(issue_id, 0)
+        await load_balance(issue_id, 0)
         # global new_ibdd
         print(args[0])
         if not issue_id in os.listdir():
@@ -191,10 +201,10 @@ async def use(ctx, *args):
     issue_message = await get_issue(issue_id)
     user = ctx.message.author.id
     print(issue_message)
-    block_check = await block_data(user, server_id, use_amount)
+    block_check = True  # use check bal here
     #############
     if block_check:
-        await ctx.send("You used {} PC credits\n`{}`".format(use_amount, issue_id))
+        await ctx.send("Amount to use: \n`{}`\n How do you want to vote\n`{}`".format(use_amount, issue_id))
     else:
         await ctx.send("**You do not have enough balance.** Current balance: `{}`".format(current_bal))
 
@@ -228,14 +238,13 @@ async def clear(ctx, amount=100):
         async for message in channel.history(limit=100):
             messages.append(message)
         await channel.delete_messages(messages)
-        # await client.say('Messages deleted')
 
 
 # assign Roles
 @client.event
 async def on_member_join(member):
-    role = doscord.utils.get(member.server.roles, name='Cool People')
-    await client.add_roles(member, role)
+    role = discord.utils.get(member.guild.roles, name=VOTER)
+    await member.add_roles(role)
 
 
 @client.event
@@ -268,14 +277,24 @@ async def on_reaction_add(reaction, user):
                 await message.remove_reaction(ibdd_emojis[0], message.author)
                 await user.send('You have opted to ** Convert vote to Political Capital** {} for the issue: *{}*\n`{}`'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:], issue_id))
             elif reaction.emoji == ibdd_emojis[3]:
-                await user.send('You will **Trade Political Capital for share in vote** {} for the issue: \n*"{}"* \nHow would you like to vote?\n`{}`'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:], issue_id))
-        elif message.content[:8] == "You will":
-            issue_id = message.content.split('\n')[-1].replace('`', '')
+                bal = await get_balance(user.id)
+                await user.send('How much PC whould you like use to vote {} for the issue \n*"{}"*\nYour current balance is **{} PC** \nType: **!use** `[amount]` `[issue id]`'.format(reaction.emoji, issue_message, bal))
+                # await user.send('You will **Trade Political Capital for share in vote** {} for the issue: \n*"{}"* \nHow would you like to vote?\n`{}`'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:], issue_id))
+        elif message.content[:8] == "Amount t":
+            bal = await get_balance(user.id)
+            issue_id = message.content.split('\n')[3].replace('`', '')
+            used = float(message.content.split('\n')[1].replace('`', ''))
+            new_bal = float(bal) - float(used)
             issue_message = await get_issue(issue_id)
-            if reaction.emoji == ibdd_emojis[1] or reaction.emoji == ibdd_emojis[0]:
-                await message.remove_reaction(ibdd_emojis[0], message.author)
-                await message.remove_reaction(ibdd_emojis[1], message.author)
-                await user.send('How much PC whould you like use to vote {} for the issue \n*"{}"*\nYour current balance is **12.65 PC** \nType: **!use** `[amount]` `[issue id]`'.format(reaction.emoji, issue_message))
+            if reaction.emoji == ibdd_emojis[0]:
+                await block_data(user.id, SERVER_ID, used, 'Y-'+issue_id)
+                the_vote = 'yes'
+            elif reaction.emoji == ibdd_emojis[1]:
+                await block_data(user.id, SERVER_ID, used, 'Y-'+issue_id)
+                the_vote = 'no'
+            await message.remove_reaction(ibdd_emojis[0], message.author)
+            await message.remove_reaction(ibdd_emojis[1], message.author)
+            await user.send('You used {} PC to vote {} {} for the issue \n*"{}"*\nYour current balance is **{} PC**'.format(used, the_vote, reaction.emoji, issue_message, new_bal))
 
     # await client.send_message(channel, '{} has added {} to the the message {}'.format(user.name, reaction.emoji, reaction.message.content))
 
