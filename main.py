@@ -30,6 +30,7 @@ NOTE_LOAD = 'LOAD'
 NOTE_YES = 'YES'
 NOTE_NO = 'NO'
 NEW_DATA = 'new_data.txt'
+NOTE_CONVERT = 'CONVERT'
 
 
 async def get_issue(issue_id):
@@ -261,6 +262,7 @@ async def on_reaction_add(reaction, user):
                 await message.remove_reaction(ibdd_emojis[0], message.author)
                 await message.remove_reaction(ibdd_emojis[1], message.author)
                 await message.remove_reaction(ibdd_emojis[2], message.author)
+                await block_data(user.id, issue_id, 0, NOTE_YES)
                 await user.send('You have voted **YES** {} to the issue: *{}*\n`{}`'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:], issue_id))
                 # print(user.id)
                 # print(user.name)
@@ -269,12 +271,14 @@ async def on_reaction_add(reaction, user):
                 await message.remove_reaction(ibdd_emojis[0], message.author)
                 await message.remove_reaction(ibdd_emojis[1], message.author)
                 await message.remove_reaction(ibdd_emojis[2], message.author)
+                await block_data(user.id, issue_id, 0, NOTE_NO)
                 await user.send('You have voted **NO** {} to the issue: *{}*\n`{}`'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:], issue_id))
             elif reaction.emoji == ibdd_emojis[2]:
                 await message.remove_reaction(ibdd_emojis[3], message.author)
                 await message.remove_reaction(ibdd_emojis[1], message.author)
                 await message.remove_reaction(ibdd_emojis[2], message.author)
                 await message.remove_reaction(ibdd_emojis[0], message.author)
+                await block_data(user.id, issue_id, 0, NOTE_CONVERT)
                 await user.send('You have opted to ** Convert vote to Political Capital** {} for the issue: *{}*\n`{}`'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:], issue_id))
             elif reaction.emoji == ibdd_emojis[3]:
                 bal = await get_balance(user.id)
