@@ -22,6 +22,7 @@ status = ['Have fun!', 'VOTE FLUX', 'Type: !IBDD']
 ibdd_emojis = ['\u2611', '\u274E', '\U0001F48E', '\U0001F4CA']
 SERVER_ID = 551999201714634752
 BLOCKCHAIN_CH_ID = 645889124817043457
+COMMANDS_CHANNEL_ID = 551999201714634757
 USER_ME_ID = 449910203220099073
 FLUX_BOT_ID = 551997414978879499
 VOTER = 'Voter'
@@ -31,6 +32,7 @@ NOTE_YES = 'YES'
 NOTE_NO = 'NO'
 NEW_DATA = 'new_data.txt'
 NOTE_CONVERT = 'CONVERT'
+issue_in_session = False
 
 
 async def get_issue(issue_id):
@@ -122,6 +124,17 @@ async def update_blockchain():
         await asyncio.sleep(5)
 
 
+async def issue_timer():
+    global issue_in_session
+    server = client.get_guild(id=SERVER_ID)
+    channel = client.get_channel(COMMANDS_CHANNEL_ID)
+    await asyncio.sleep(60*4)
+    await channel.send("1 min remaining")
+    await asyncio.sleep(60*1)
+    await channel.send("Vote finished")
+    issue_in_session = False
+
+
 @client.event
 async def on_ready():
     # await load_balance(USER_ME_ID, 100)
@@ -162,6 +175,7 @@ async def on_message(message):
 # write message
 @client.command(pass_context=True)
 async def IBDD(ctx, *args):
+    global issue_in_session
     server_id = ctx.message.guild.id
     channel_id = ctx.message.channel.id
     message_id = ctx.message.id
@@ -181,14 +195,19 @@ async def IBDD(ctx, *args):
             f.write(args[0])
             f.close()
         # new_ibdd = IssueBasedDD(issue_id, str(args[0]))
-        if server:
+        if not issue_in_session:
+            issue_in_session = True
+            client.loop.create_task(issue_timer())
             for member in server.members:
-                dont_send = ['Flux Bot#8753', 'Flux Projects#3812', 'XertroV#9931']
+                dont_send = ['Flux Bot#8753', 'Flux Projects#3812',
+                             'XertroV#9931', 'Aus Bills#3405']
                 if not str(member) in dont_send:
                     print('name: {}'.format(member))
                     await member.send('**Vote: **' + str(args[0])+'\n:ballot_box_with_check: YES \n:negative_squared_cross_mark: NO \n:gem: Convert vote to Political Capital \n:bar_chart:  Trade Political Capital for share in vote\n`{}`'.format(issue_id))
                     # await client.send_message(member, '**Vote: **' + str(args[0])+'\n:ballot_box_with_check: YES \n:negative_squared_cross_mark: NO \n:gem: Convert vote to Political Capital \n:bar_chart:  Trade Political Capital for share in vote')
-        await ctx.send('**Vote for** *{}* **will end in 5 mins**'.format(args[0]))
+                    await ctx.send('**Vote for** *{}* **will end in 5 mins**'.format(args[0]))
+        else:
+            await ctx.send("Another vote is in session")
     else:
         await ctx.send('*error*')
 
