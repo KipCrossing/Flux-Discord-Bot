@@ -25,9 +25,13 @@ See [here](https://discordpy.readthedocs.io/en/latest/) for the discord.py docs.
 
 ## TODO
 
-- Put vote on timer
 - Auto transfer/trade non voters
 - calculate SBR
 - distribute PC
 - calculate outcome
 - Add inflation PC to all voters
+
+# Upcoming Features
+
+- Devs to be able to create unique opperations (eg a vote on create channel)
+- Votes on federal bills
