@@ -142,7 +142,6 @@ async def non_voters_transver():
             data = message.content.split('\n')[2].replace('Block Data: ', '')[:-1]
             data = '[' + data + ']'
             data = ast.literal_eval(data)
-            should_break = False
             for t in data:
                 if t[0] == str(member.id) and t[1] == issue_in_session:
                     voted = True
@@ -152,8 +151,34 @@ async def non_voters_transver():
             await block_data(member.id, issue_in_session, 0, NOTE_CONVERT)
 
 
+async def get_converts():
+    global issue_in_session
+    server = client.get_guild(id=SERVER_ID)
+    channel = client.get_channel(BLOCKCHAIN_CH_ID)
+    converts = 0
+    convert_ids = []
+    async for message in channel.history(limit=None, oldest_first=False):
+        data = message.content.split('\n')[2].replace('Block Data: ', '')[:-1]
+        data = '[' + data + ']'
+        data = ast.literal_eval(data)
+        for t in data:
+            if t[1] == issue_in_session and t[5] == NOTE_CONVERT:
+                converts += 1
+                convert_ids.append(t[0])
+
+    return(converts, convert_ids)
+
+
 async def count_votes():
     await non_voters_transver()
+    await asyncio.sleep(10)  # change this for end vote check on BC
+    sum_traded_votes, convert_ids = await get_converts()
+    server_id = SERVER_ID
+    server_bal = await get_balance(server_id)
+    vote_price = round(float(server_bal)/float(sum_traded_votes), 2)
+    for id in convert_ids:
+        await block_data(server_id, id, vote_price, NOTE_TRANSFER)
+    print(sum_traded_votes, vote_price)
 
 
 async def issue_timer():

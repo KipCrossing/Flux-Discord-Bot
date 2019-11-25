@@ -25,7 +25,8 @@ See [here](https://discordpy.readthedocs.io/en/latest/) for the discord.py docs.
 
 ## TODO
 
-- calculate SBR
+- redo blockchain
+- redo get_bal function
 - distribute PC
 - calculate outcome
 - Add inflation PC to all voters
