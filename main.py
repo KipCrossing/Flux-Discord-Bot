@@ -71,13 +71,13 @@ async def get_balance(blockchain_id):
             data = ast.literal_eval(data)
             should_break = False
             for t in data:
-                if t[0] == str(blockchain_id) and t[5]:
-                    print(t)
-                    print('Current bal: {}'.format(t[3]))
+                if t[0] == str(blockchain_id):
+                    # print(t)
+                    # print('Current bal: {}'.format(t[3]))
                     current_bal = float(t[3])
                     should_break = True
                 elif t[1] == str(blockchain_id):
-                    print('id here')
+                    # print('id here')
                     current_bal = float(t[4])
                     should_break = True
             if should_break:
@@ -92,16 +92,19 @@ async def block_data(sender, receiver, amount, note):
     s_bal = await get_balance(sender)
     r_bal = await get_balance(receiver)
     print(s_bal, r_bal, amount)
-    sender_bal = s_bal - amount
-    receiver_bal = r_bal + amount
-    if sender_bal >= 0:
-        f = open(NEW_DATA, 'a+')
-        # [sender_user_id, receiver_id, transver_amount, sender_new_bal]
-        f.write('["{}","{}","{}","{}","{}","{}"],'.format(
-            sender, receiver, amount, sender_bal, receiver_bal, note))
-        f.close()
-        return(True)
-    else:
+    try:
+        sender_bal = s_bal - amount
+        receiver_bal = r_bal + amount
+        if sender_bal >= 0:
+            f = open(NEW_DATA, 'a+')
+            # [sender_user_id, receiver_id, transver_amount, sender_new_bal]
+            f.write('["{}","{}","{}","{}","{}","{}"],'.format(
+                sender, receiver, amount, sender_bal, receiver_bal, note))
+            f.close()
+            return(True)
+        else:
+            return(False)
+    except Exception as e:
         return(False)
 
 
@@ -124,25 +127,60 @@ async def update_blockchain():
         await asyncio.sleep(5)
 
 
+async def non_voters_transver():
+    global issue_in_session
+    server = client.get_guild(id=SERVER_ID)
+    channel = client.get_channel(BLOCKCHAIN_CH_ID)
+    messages = []
+    counter = 0
+    current_bal = None
+    print(issue_in_session)
+    for member in server.members:
+        print(member.id)
+        voted = False
+        async for message in channel.history(limit=None, oldest_first=False):
+            data = message.content.split('\n')[2].replace('Block Data: ', '')[:-1]
+            data = '[' + data + ']'
+            data = ast.literal_eval(data)
+            should_break = False
+            for t in data:
+                if t[0] == str(member.id) and t[1] == issue_in_session:
+                    voted = True
+        if voted:
+            print(member.id, 'voted')
+        else:
+            await block_data(member.id, issue_in_session, 0, NOTE_CONVERT)
+
+
+async def count_votes():
+    await non_voters_transver()
+
+
 async def issue_timer():
     global issue_in_session
     server = client.get_guild(id=SERVER_ID)
     channel = client.get_channel(COMMANDS_CHANNEL_ID)
-    await asyncio.sleep(60*4)
+    await asyncio.sleep(60*1)
     await channel.send("1 min remaining")
     await asyncio.sleep(60*1)
     await channel.send("Vote finished")
+    await count_votes()
     issue_in_session = False
 
 
 @client.event
 async def on_ready():
-    # await load_balance(USER_ME_ID, 100)
     # game = discord.Game(name='Type: !IBDD')
     # await client.change_presence(status=discord.Status.idle, activity=game)
+
     print('Bot ready!')
     server_id = SERVER_ID
     server = client.get_guild(server_id)
+    for member in server.members:
+        bal = await get_balance(member.id)
+        if not bal:
+            await load_balance(member.id, 100)  # Change 100 to calculated mean
+        print(member.name, bal)
     if server:
         print("Connected")
     else:
@@ -186,17 +224,11 @@ async def IBDD(ctx, *args):
     if len(args) == 0:
         await ctx.send('**To create an IBDD issue to be voted on type: ** \n !IBDD "Issue to be voted on"')
     elif len(args) == 1:
-        issue_id = str(server_id) + '-' + str(channel_id) + '-' + str(message_id)
-        await load_balance(issue_id, 0)
-        # global new_ibdd
-        print(args[0])
-        if not issue_id in os.listdir():
-            f = open(issue_id, 'w')
-            f.write(args[0])
-            f.close()
-        # new_ibdd = IssueBasedDD(issue_id, str(args[0]))
         if not issue_in_session:
-            issue_in_session = True
+            issue_id = str(server_id) + '-' + str(channel_id) + '-' + str(message_id)
+            await load_balance(issue_id, 0)
+            print(args[0])
+            issue_in_session = issue_id
             client.loop.create_task(issue_timer())
             for member in server.members:
                 dont_send = ['Flux Bot#8753', 'Flux Projects#3812',
@@ -205,7 +237,7 @@ async def IBDD(ctx, *args):
                     print('name: {}'.format(member))
                     await member.send('**Vote: **' + str(args[0])+'\n:ballot_box_with_check: YES \n:negative_squared_cross_mark: NO \n:gem: Convert vote to Political Capital \n:bar_chart:  Trade Political Capital for share in vote\n`{}`'.format(issue_id))
                     # await client.send_message(member, '**Vote: **' + str(args[0])+'\n:ballot_box_with_check: YES \n:negative_squared_cross_mark: NO \n:gem: Convert vote to Political Capital \n:bar_chart:  Trade Political Capital for share in vote')
-                    await ctx.send('**Vote for** *{}* **will end in 5 mins**'.format(args[0]))
+            await ctx.send('**Vote for** *{}*  **will end in 2 mins**'.format(args[0]))
         else:
             await ctx.send("Another vote is in session")
     else:

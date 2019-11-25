@@ -25,7 +25,6 @@ See [here](https://discordpy.readthedocs.io/en/latest/) for the discord.py docs.
 
 ## TODO
 
-- Auto transfer/trade non voters
 - calculate SBR
 - distribute PC
 - calculate outcome
