@@ -1,4 +1,3 @@
-from ibdd import IssueBasedDD
 from itertools import cycle
 import asyncio
 from discord.ext import commands
@@ -6,6 +5,7 @@ import discord
 import os
 from blockchain import Blockchain, Block
 import ast
+from discordibdd import BlockchainManager
 
 print("Flux Discord Bot")
 
@@ -45,7 +45,7 @@ async def get_issue(issue_id):
 
 async def send_pc(voter_id, amount):
     server_id = SERVER_ID
-    await block_data(server_id, voter_id, amount, NOTE_TRANSFER)
+    await update_block(server_id, voter_id, amount, NOTE_TRANSFER)
 
 
 async def load_balance(receiver_id, amount):
@@ -88,7 +88,7 @@ async def get_balance(blockchain_id):
     return(current_bal)
 
 
-async def block_data(sender, receiver, amount, note):
+async def update_block(sender, receiver, amount, note):
     s_bal = await get_balance(sender)
     r_bal = await get_balance(receiver)
     print(s_bal, r_bal, amount)
@@ -106,25 +106,6 @@ async def block_data(sender, receiver, amount, note):
             return(False)
     except Exception as e:
         return(False)
-
-
-async def update_blockchain():
-    print('Update blockchain')
-    await client.wait_until_ready()
-    print(client.is_closed())
-    while not client.is_closed():
-        if NEW_DATA in os.listdir():
-            f = open(NEW_DATA, 'r')
-            data = ''
-            for line in f:
-                data = line
-            f.close()
-            blockchain.mine(Block(data))
-            os.remove(NEW_DATA)
-            server = client.get_guild(id=SERVER_ID)
-            channel = client.get_channel(BLOCKCHAIN_CH_ID)
-            await channel.send(blockchain.block)
-        await asyncio.sleep(5)
 
 
 async def non_voters_transver():
@@ -148,7 +129,7 @@ async def non_voters_transver():
         if voted:
             print(member.id, 'voted')
         else:
-            await block_data(member.id, issue_in_session, 0, NOTE_CONVERT)
+            await update_block(member.id, issue_in_session, 0, NOTE_CONVERT)
 
 
 async def get_converts():
@@ -177,7 +158,7 @@ async def count_votes():
     server_bal = await get_balance(server_id)
     vote_price = round(float(server_bal)/float(sum_traded_votes), 2)
     for id in convert_ids:
-        await block_data(server_id, id, vote_price, NOTE_TRANSFER)
+        await update_block(server_id, id, vote_price, NOTE_TRANSFER)
     print(sum_traded_votes, vote_price)
 
 
@@ -338,7 +319,7 @@ async def on_reaction_add(reaction, user):
                 await message.remove_reaction(ibdd_emojis[0], message.author)
                 await message.remove_reaction(ibdd_emojis[1], message.author)
                 await message.remove_reaction(ibdd_emojis[2], message.author)
-                await block_data(user.id, issue_id, 0, NOTE_YES)
+                await update_block(user.id, issue_id, 0, NOTE_YES)
                 await user.send('You have voted **YES** {} to the issue: *{}*\n`{}`'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:], issue_id))
                 # print(user.id)
                 # print(user.name)
@@ -347,14 +328,14 @@ async def on_reaction_add(reaction, user):
                 await message.remove_reaction(ibdd_emojis[0], message.author)
                 await message.remove_reaction(ibdd_emojis[1], message.author)
                 await message.remove_reaction(ibdd_emojis[2], message.author)
-                await block_data(user.id, issue_id, 0, NOTE_NO)
+                await update_block(user.id, issue_id, 0, NOTE_NO)
                 await user.send('You have voted **NO** {} to the issue: *{}*\n`{}`'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:], issue_id))
             elif reaction.emoji == ibdd_emojis[2]:
                 await message.remove_reaction(ibdd_emojis[3], message.author)
                 await message.remove_reaction(ibdd_emojis[1], message.author)
                 await message.remove_reaction(ibdd_emojis[2], message.author)
                 await message.remove_reaction(ibdd_emojis[0], message.author)
-                await block_data(user.id, issue_id, 0, NOTE_CONVERT)
+                await update_block(user.id, issue_id, 0, NOTE_CONVERT)
                 await user.send('You have opted to ** Convert vote to Political Capital** {} for the issue: *{}*\n`{}`'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:], issue_id))
             elif reaction.emoji == ibdd_emojis[3]:
                 bal = await get_balance(user.id)
@@ -367,10 +348,10 @@ async def on_reaction_add(reaction, user):
             new_bal = float(bal) - float(used)
             issue_message = await get_issue(issue_id)
             if reaction.emoji == ibdd_emojis[0]:
-                await block_data(user.id, SERVER_ID, used, 'Y-'+issue_id)
+                await update_block(user.id, SERVER_ID, used, 'Y-'+issue_id)
                 the_vote = 'yes'
             elif reaction.emoji == ibdd_emojis[1]:
-                await block_data(user.id, SERVER_ID, used, 'Y-'+issue_id)
+                await update_block(user.id, SERVER_ID, used, 'Y-'+issue_id)
                 the_vote = 'no'
             await message.remove_reaction(ibdd_emojis[0], message.author)
             await message.remove_reaction(ibdd_emojis[1], message.author)
@@ -381,6 +362,8 @@ async def on_reaction_add(reaction, user):
 
 # Background task
 
+bm = BlockchainManager(client, SERVER_ID, BLOCKCHAIN_CH_ID)
 
-client.loop.create_task(update_blockchain())
+
+client.loop.create_task(bm.update_blockchain())
 client.run(TOKEN)
