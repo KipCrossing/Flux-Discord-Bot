@@ -18,16 +18,18 @@ class Block:
     def hash(self):
         h = hashlib.sha256()
         h.update(
-            str(self.nonce).encode('utf-8') +
-            str(self.data).encode('utf-8') +
             str(self.previous_hash).encode('utf-8') +
-            str(self.timestamp).encode('utf-8') +
-            str(self.blockNo).encode('utf-8')
+            str(self.blockNo).encode('utf-8') +
+            str(self.data).encode('utf-8') +
+            str(self.nonce).encode('utf-8') +
+            str(self.timestamp).encode('utf-8')
         )
         return h.hexdigest()
 
     def __str__(self):
-        return "Block Hash: " + str(self.hash()) + "\nBlockNo: " + str(self.blockNo) + "\nBlock Data: " + str(self.data) + "\n--------------\n"
+        return "Block Hash: " + str(self.hash()) + "\nBlockNo: " + str(self.blockNo) + "\nBlock Data: " + str(self.data) + \
+            "\nNonce: " + str(self.nonce) + "\nTimestamp: " + \
+            str(self.timestamp) + "\n--------------\n"
 
 
 class Blockchain:
@@ -39,11 +41,11 @@ class Blockchain:
     lbf = 'lastblock.txt'
 
     if lbf in os.listdir():
+        # wake up to cirrect block
         f = open('lastblock.txt', 'r')
         lastblock_info = []
         for line in f:
             lastblock_info.append(line)
-
         block = Block(lastblock_info[2].replace('Block Data: ', '').replace('\n', ''))
         block.hash = lastblock_info[0].replace('Block Hash: ', '').replace('\n', '')
         block.blockNo = int(lastblock_info[1].replace('BlockNo: ', ''))
@@ -68,6 +70,7 @@ class Blockchain:
         # f.write(str(self.block))
         # f.close()
         f = open('lastblock.txt', 'w')
+        print(self.block)
         f.write(str(self.block))
         f.close()
 
