@@ -43,7 +43,7 @@ issue_man = IssueManager(bm, COMMANDS_CHANNEL_ID)
 async def on_ready():
     # game = discord.Game(name='Type: !IBDD')
     # await client.change_presence(status=discord.Status.idle, activity=game)
-
+    await client.wait_until_ready()
     print('Bot ready!')
     server_id = SERVER_ID
     server = client.get_guild(server_id)
@@ -101,39 +101,29 @@ async def IBDD(ctx, *args):
                 if not str(member) in dont_send:
                     print('name: {}'.format(member))
                     await member.send('**Vote: **' + str(args[0])+'\n:ballot_box_with_check: YES \n:negative_squared_cross_mark: NO \n:gem: Convert vote to Political Capital \n:bar_chart:  Trade Political Capital for share in vote\n`{}`'.format(issue_id))
-                    # await client.send_message(member, '**Vote: **' + str(args[0])+'\n:ballot_box_with_check: YES \n:negative_squared_cross_mark: NO \n:gem: Convert vote to Political Capital \n:bar_chart:  Trade Political Capital for share in vote')
             await ctx.send('**Vote for** *{}*  **will end in 2 mins**'.format(args[0]))
         else:
             await ctx.send("Another vote is in session")
     else:
         await ctx.send('*error*')
 
-# write message
+
 @client.command()
 async def use(ctx, *args):
-
     use_amount = float(args[0])
     issue_id = issue_man.issue_in_session
     server_id = 551999201714634752
     issue_message = await issue_man.get_issue(issue_id)
     user = ctx.message.author.id
     print(issue_message)
-    block_check = True  # use check bal here
-    #############
+    bal = await bm.get_balance(user)
+    block_check = True
+    if float(bal) - use_amount < 0:
+        block_check = False
     if block_check:
         await ctx.send("Amount to use: \n`{}`\n How do you want to vote\n`{}`".format(use_amount, issue_id))
     else:
         await ctx.send("**You do not have enough balance.** Current balance: `{}`".format(current_bal))
-
-
-# Read and write
-@client.command()
-async def echo(*args):
-    output = ''
-    for word in args:
-        output += word
-        output += ' '
-    await client.say(output)
 
 
 @client.command(pass_context=True)
@@ -155,13 +145,6 @@ async def clear(ctx, amount=100):
         async for message in channel.history(limit=100):
             messages.append(message)
         await channel.delete_messages(messages)
-
-
-# assign Roles
-@client.event
-async def on_member_join(member):
-    role = discord.utils.get(member.guild.roles, name=VOTER)
-    await member.add_roles(role)
 
 
 @client.event
@@ -196,7 +179,6 @@ async def on_reaction_add(reaction, user):
             elif reaction.emoji == ibdd_emojis[3]:
                 bal = await bm.get_balance(user.id)
                 await user.send('How much PC whould you like use to vote {} for the issue \n*"{}"*\nYour current balance is **{} PC** \nType: **!use** `[amount]`'.format(reaction.emoji, issue_message, bal))
-                # await user.send('You will **Trade Political Capital for share in vote** {} for the issue: \n*"{}"* \nHow would you like to vote?\n`{}`'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:], issue_id))
         elif message.content[:8] == "Amount t":
             bal = await bm.get_balance(user.id)
             issue_id = message.content.split('\n')[3].replace('`', '')
@@ -212,6 +194,13 @@ async def on_reaction_add(reaction, user):
             await message.remove_reaction(ibdd_emojis[0], message.author)
             await message.remove_reaction(ibdd_emojis[1], message.author)
             await user.send('You used {} PC to vote {} {} for the issue \n*"{}"*\nYour current balance is **{} PC**'.format(used, the_vote, reaction.emoji, issue_message, new_bal))
+
+
+# # assign Roles
+# @client.event
+# async def on_member_join(member):
+#     role = discord.utils.get(member.guild.roles, name=VOTER)
+#     await member.add_roles(role)
 
 
 # Background task
