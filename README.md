@@ -35,7 +35,7 @@ See [here](https://discordpy.readthedocs.io/en/latest/) for the discord.py docs.
 
 ## TODO
 
-- redo blockchain
+- Save accound balance data via SQL
 - redo get_bal function
 - distribute PC
 - calculate outcome
