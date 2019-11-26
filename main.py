@@ -5,7 +5,7 @@ import discord
 import os
 from blockchain import Blockchain, Block
 import ast
-from discordibdd import BlockchainManager
+from discordibdd import BlockchainManager, IssueManager
 
 print("Flux Discord Bot")
 
@@ -32,89 +32,12 @@ NOTE_YES = 'YES'
 NOTE_NO = 'NO'
 NEW_DATA = 'new_data.txt'
 NOTE_CONVERT = 'CONVERT'
-issue_in_session = False
 
 bm = BlockchainManager(client, SERVER_ID, BLOCKCHAIN_CH_ID)
+issue_man = IssueManager(bm, COMMANDS_CHANNEL_ID)
 
 
-async def get_issue(issue_id):
-    issue_data = issue_id.split('-')
-    server = client.get_guild(id=int(issue_data[0]))
-    channel = client.get_channel(int(issue_data[1]))
-    message = await channel.fetch_message(int(issue_data[2]))
-    return(message.content.replace('!IBDD ', '').replace('"', ''))
-
-
-async def send_pc(voter_id, amount):
-    server_id = SERVER_ID
-    await bm.update_block(server_id, voter_id, amount, NOTE_TRANSFER)
-
-
-async def non_voters_transver():
-    global issue_in_session
-    server = client.get_guild(id=SERVER_ID)
-    channel = client.get_channel(BLOCKCHAIN_CH_ID)
-    messages = []
-    counter = 0
-    current_bal = None
-    print(issue_in_session)
-    for member in server.members:
-        print(member.id)
-        voted = False
-        async for message in channel.history(limit=None, oldest_first=False):
-            data = message.content.split('\n')[2].replace('Block Data: ', '')[:-1]
-            data = '[' + data + ']'
-            data = ast.literal_eval(data)
-            for t in data:
-                if t[0] == str(member.id) and t[1] == issue_in_session:
-                    voted = True
-        if voted:
-            print(member.id, 'voted')
-        else:
-            await bm.update_block(member.id, issue_in_session, 0, NOTE_CONVERT)
-
-
-async def get_converts():
-    global issue_in_session
-    server = client.get_guild(id=SERVER_ID)
-    channel = client.get_channel(BLOCKCHAIN_CH_ID)
-    converts = 0
-    convert_ids = []
-    async for message in channel.history(limit=None, oldest_first=False):
-        data = message.content.split('\n')[2].replace('Block Data: ', '')[:-1]
-        data = '[' + data + ']'
-        data = ast.literal_eval(data)
-        for t in data:
-            if t[1] == issue_in_session and t[5] == NOTE_CONVERT:
-                converts += 1
-                convert_ids.append(t[0])
-
-    return(converts, convert_ids)
-
-
-async def count_votes():
-    await non_voters_transver()
-    await asyncio.sleep(10)  # change this for end vote check on BC
-    sum_traded_votes, convert_ids = await get_converts()
-    server_id = SERVER_ID
-    server_bal = await bm.get_balance(server_id)
-    vote_price = round(float(server_bal)/float(sum_traded_votes), 2)
-    for id in convert_ids:
-        await bm.update_block(server_id, id, vote_price, NOTE_TRANSFER)
-    print(sum_traded_votes, vote_price)
-
-
-async def issue_timer():
-    global issue_in_session
-    server = client.get_guild(id=SERVER_ID)
-    channel = client.get_channel(COMMANDS_CHANNEL_ID)
-    await asyncio.sleep(60*1)
-    await channel.send("1 min remaining")
-    await asyncio.sleep(60*1)
-    await channel.send("Vote finished")
-    await count_votes()
-    issue_in_session = False
-
+# Discord event Triggers
 
 @client.event
 async def on_ready():
@@ -124,11 +47,6 @@ async def on_ready():
     print('Bot ready!')
     server_id = SERVER_ID
     server = client.get_guild(server_id)
-    for member in server.members:
-        bal = await bm.get_balance(member.id)
-        if not bal:
-            await bm.load_balance(member.id, 100)  # Change 100 to calculated mean
-        print(member.name, bal)
     if server:
         print("Connected")
     else:
@@ -161,7 +79,6 @@ async def on_message(message):
 # write message
 @client.command(pass_context=True)
 async def IBDD(ctx, *args):
-    global issue_in_session
     server_id = ctx.message.guild.id
     channel_id = ctx.message.channel.id
     message_id = ctx.message.id
@@ -172,15 +89,15 @@ async def IBDD(ctx, *args):
     if len(args) == 0:
         await ctx.send('**To create an IBDD issue to be voted on type: ** \n !IBDD "Issue to be voted on"')
     elif len(args) == 1:
-        if not issue_in_session:
+        if not issue_man.issue_in_session:
             issue_id = str(server_id) + '-' + str(channel_id) + '-' + str(message_id)
             await bm.load_balance(issue_id, 0)
             print(args[0])
-            issue_in_session = issue_id
-            client.loop.create_task(issue_timer())
+            issue_man.issue_in_session = issue_id
+            client.loop.create_task(issue_man.issue_timer())
             for member in server.members:
                 dont_send = ['Flux Bot#8753', 'Flux Projects#3812',
-                             'XertroV#9931', 'Aus Bills#3405']
+                             'XertroV#9931', 'Aus Bills#3405', ' deathlist8#3249']
                 if not str(member) in dont_send:
                     print('name: {}'.format(member))
                     await member.send('**Vote: **' + str(args[0])+'\n:ballot_box_with_check: YES \n:negative_squared_cross_mark: NO \n:gem: Convert vote to Political Capital \n:bar_chart:  Trade Political Capital for share in vote\n`{}`'.format(issue_id))
@@ -196,9 +113,9 @@ async def IBDD(ctx, *args):
 async def use(ctx, *args):
 
     use_amount = float(args[0])
-    issue_id = args[1]
+    issue_id = issue_man.issue_in_session
     server_id = 551999201714634752
-    issue_message = await get_issue(issue_id)
+    issue_message = await issue_man.get_issue(issue_id)
     user = ctx.message.author.id
     print(issue_message)
     block_check = True  # use check bal here
@@ -256,16 +173,13 @@ async def on_reaction_add(reaction, user):
         if message.content[:10] == "**Vote: **":
 
             issue_id = message.content.split('\n')[-1].replace('`', '')
-            issue_message = await get_issue(issue_id)
+            issue_message = await issue_man.get_issue(issue_id)
             if reaction.emoji == ibdd_emojis[0]:
                 await message.remove_reaction(ibdd_emojis[0], message.author)
                 await message.remove_reaction(ibdd_emojis[1], message.author)
                 await message.remove_reaction(ibdd_emojis[2], message.author)
                 await bm.update_block(user.id, issue_id, 0, NOTE_YES)
                 await user.send('You have voted **YES** {} to the issue: *{}*\n`{}`'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:], issue_id))
-                # print(user.id)
-                # print(user.name)
-                # new_ibdd.vote_yes(user.id)
             elif reaction.emoji == ibdd_emojis[1]:
                 await message.remove_reaction(ibdd_emojis[0], message.author)
                 await message.remove_reaction(ibdd_emojis[1], message.author)
@@ -281,29 +195,25 @@ async def on_reaction_add(reaction, user):
                 await user.send('You have opted to ** Convert vote to Political Capital** {} for the issue: *{}*\n`{}`'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:], issue_id))
             elif reaction.emoji == ibdd_emojis[3]:
                 bal = await bm.get_balance(user.id)
-                await user.send('How much PC whould you like use to vote {} for the issue \n*"{}"*\nYour current balance is **{} PC** \nType: **!use** `[amount]` `[issue id]`'.format(reaction.emoji, issue_message, bal))
+                await user.send('How much PC whould you like use to vote {} for the issue \n*"{}"*\nYour current balance is **{} PC** \nType: **!use** `[amount]`'.format(reaction.emoji, issue_message, bal))
                 # await user.send('You will **Trade Political Capital for share in vote** {} for the issue: \n*"{}"* \nHow would you like to vote?\n`{}`'.format(reaction.emoji, reaction.message.content.split('\n')[0][10:], issue_id))
         elif message.content[:8] == "Amount t":
             bal = await bm.get_balance(user.id)
             issue_id = message.content.split('\n')[3].replace('`', '')
             used = float(message.content.split('\n')[1].replace('`', ''))
             new_bal = float(bal) - float(used)
-            issue_message = await get_issue(issue_id)
+            issue_message = await issue_man.get_issue(issue_id)
             if reaction.emoji == ibdd_emojis[0]:
                 await bm.update_block(user.id, SERVER_ID, used, 'Y-'+issue_id)
                 the_vote = 'yes'
             elif reaction.emoji == ibdd_emojis[1]:
-                await bm.update_block(user.id, SERVER_ID, used, 'Y-'+issue_id)
+                await bm.update_block(user.id, SERVER_ID, used, 'N-'+issue_id)
                 the_vote = 'no'
             await message.remove_reaction(ibdd_emojis[0], message.author)
             await message.remove_reaction(ibdd_emojis[1], message.author)
             await user.send('You used {} PC to vote {} {} for the issue \n*"{}"*\nYour current balance is **{} PC**'.format(used, the_vote, reaction.emoji, issue_message, new_bal))
 
-    # await client.send_message(channel, '{} has added {} to the the message {}'.format(user.name, reaction.emoji, reaction.message.content))
-
 
 # Background task
-
-
 client.loop.create_task(bm.update_blockchain())
 client.run(TOKEN)
