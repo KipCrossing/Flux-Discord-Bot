@@ -12,15 +12,15 @@ It would be good to share this project so that discord communities can manage th
 
 ### Philosophy
 
-This bot will take advantage of the _Vote swapping_ aspect of IBDD and will calculate the values of votes based on a [Simple Blind Ratio](VOTE-SWAPPING.md).Further, Political Capital (PC) will be inflated based on the recommendation in [The-Liquidity-Problem](THE-LIQUIDITY-PROBLEM.md)
+This bot will take advantage of the _Vote swapping_ aspect of IBDD and will calculate the values of votes based on a [Simple Blind Ratio](docs/VOTE-SWAPPING.md).Further, Political Capital (PC) will be inflated based on the recommendation in [docs/The-Liquidity-Problem](THE-LIQUIDITY-PROBLEM.md)
 
 ### The Blockchain
 
 For educational purposes, I decided to include a blockchain to record transactions. The voting data on the blockchain is structured according to:
 
-[Blockchain Data](BLOCKCHAIN_DATA.md)
+[Blockchain Data](docs/BLOCKCHAIN_DATA.md)
 
-![alt text](https://github.com/KipCrossing/Flux-Discord-Bot/blob/master/Flux-bot-example.png)
+![alt text](assets/Flux-bot-example.png)
 
 ## Getting Started
 
