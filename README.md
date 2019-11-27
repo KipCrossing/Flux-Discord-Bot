@@ -8,19 +8,19 @@ The purpose of this project is to create a simple version of IBDD to help others
 - Discord already has users
 - Discord allows for a wide range of customisation features (roles, channels, emojis)
 
+![alt text](assets/Flux-bot-example.png)
+
 It would be good to share this project so that discord communities can manage their servers by making the "Flux Bot" the owner. This way new discord management decisions can be made collectively via IBDD. For instance, the creation of a new channel may be put to a vote, instead of an owner making all decisions. I imagine that using a flux bot to manage your server it will help create a sense of community ownership.
 
 ### Philosophy
 
-This bot will take advantage of the _Vote swapping_ aspect of IBDD and will calculate the values of votes based on a [Simple Blind Ratio](docs/VOTE-SWAPPING.md).Further, Political Capital (PC) will be inflated based on the recommendation in [docs/The-Liquidity-Problem](THE-LIQUIDITY-PROBLEM.md)
+This bot will take advantage of the _Vote swapping_ aspect of IBDD and will calculate the values of votes based on a [Simple Blind Ratio](docs/VOTE-SWAPPING.md).Further, Political Capital (PC) will be inflated based on the recommendation in [The-Liquidity-Problem](docs/THE-LIQUIDITY-PROBLEM.md)
 
 ### The Blockchain
 
 For educational purposes, I decided to include a blockchain to record transactions. The voting data on the blockchain is structured according to:
 
-[Blockchain Data](docs/BLOCKCHAIN_DATA.md)
-
-![alt text](assets/Flux-bot-example.png)
+The structure of the data with the blockchain are described here: [Blockchain Data](docs/BLOCKCHAIN_DATA.md)
 
 ## Getting Started
 
@@ -35,7 +35,7 @@ See [here](https://discordpy.readthedocs.io/en/latest/) for the discord.py docs.
 
 ## TODO
 
-- Save accound balance data via SQL
+- Save account balance data via SQL
 - redo get_bal function
 - distribute PC
 - calculate outcome
