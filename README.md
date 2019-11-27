@@ -14,7 +14,7 @@ It would be good to share this project so that discord communities can manage th
 
 ### Philosophy
 
-This bot will take advantage of the _Vote swapping_ aspect of IBDD and will calculate the values of votes based on a [Simple Blind Ratio](docs/VOTE-SWAPPING.md).Further, Political Capital (PC) will be inflated based on the recommendation in [The-Liquidity-Problem](docs/THE-LIQUIDITY-PROBLEM.md)
+This bot will take advantage of the _Vote swapping_ aspect of [IBDD](docs/ISSUE_BASED_DIRECT_DEMOCRACY) and will calculate the values of votes based on a [Simple Blind Ratio](docs/VOTE-SWAPPING.md).Further, Political Capital (PC) will be inflated based on the recommendation in [The-Liquidity-Problem](docs/THE-LIQUIDITY-PROBLEM.md)
 
 ### The Blockchain
 
