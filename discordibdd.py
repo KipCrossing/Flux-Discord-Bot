@@ -4,7 +4,7 @@ import discord
 import asyncio
 import ast
 
-
+DATA_DIR = 'data'
 NEW_DATA = 'new_data.txt'
 NOTE_CONVERT = 'CONVERT'
 NOTE_LOAD = 'LOAD'
@@ -26,14 +26,14 @@ class BlockchainManager(object):
         blockchain_channel = self.client.get_channel(self.blockchain_channel_id)
         print(self.client.is_closed())
         while not self.client.is_closed():
-            if NEW_DATA in os.listdir():
-                f = open(NEW_DATA, 'r')
+            if NEW_DATA in os.listdir(DATA_DIR):
+                f = open(DATA_DIR + '/' + NEW_DATA, 'r')
                 data = ''
                 for line in f:
                     data = line
                 f.close()
                 self.blockchain.mine(Block(data))
-                os.remove(NEW_DATA)
+                os.remove(DATA_DIR + '/' + NEW_DATA)
                 await blockchain_channel.send(self.blockchain.block)
             await asyncio.sleep(5)
 
@@ -45,7 +45,7 @@ class BlockchainManager(object):
             sender_bal = s_bal - amount
             receiver_bal = r_bal + amount
             if sender_bal >= 0:
-                f = open(NEW_DATA, 'a+')
+                f = open(DATA_DIR + '/' + NEW_DATA, 'a+')
                 # [sender_user_id, receiver_id, transver_amount, sender_new_bal]
                 f.write('["{}","{}","{}","{}","{}","{}"],'.format(
                     sender, receiver, amount, sender_bal, receiver_bal, note))
@@ -58,7 +58,7 @@ class BlockchainManager(object):
 
     async def load_balance(self, receiver_id, amount):
         server_bal = await self.get_balance(self.server_id)
-        f = open(NEW_DATA, 'a+')
+        f = open(DATA_DIR + '/' + NEW_DATA, 'a+')
         # [sender_user_id, receiver_id, transver_amount, sender_new_bal]
         f.write('["{}","{}","{}","{}","{}","{}"],'.format(
             self.server_id, receiver_id, amount, server_bal, amount, NOTE_LOAD))

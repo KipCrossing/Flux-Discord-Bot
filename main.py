@@ -30,7 +30,6 @@ NOTE_TRANSFER = 'TRANSFER'
 NOTE_LOAD = 'LOAD'
 NOTE_YES = 'YES'
 NOTE_NO = 'NO'
-NEW_DATA = 'new_data.txt'
 NOTE_CONVERT = 'CONVERT'
 
 bm = BlockchainManager(client, SERVER_ID, BLOCKCHAIN_CH_ID)

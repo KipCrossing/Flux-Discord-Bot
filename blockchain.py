@@ -2,6 +2,8 @@ import datetime
 import hashlib
 import os
 
+lbf = 'data/lastblock.txt'
+
 
 class Block:
     blockNo = 0
@@ -38,11 +40,9 @@ class Blockchain:
     maxNonce = 2**32
     target = 2 ** (256-diff)
 
-    lbf = 'lastblock.txt'
-
     if lbf in os.listdir():
         # wake up to cirrect block
-        f = open('lastblock.txt', 'r')
+        f = open(lbf, 'r')
         lastblock_info = []
         for line in f:
             lastblock_info.append(line)
@@ -69,7 +69,7 @@ class Blockchain:
         # f = open('blockchain.txt', 'a')
         # f.write(str(self.block))
         # f.close()
-        f = open('lastblock.txt', 'w')
+        f = open(lbf, 'w')
         print(self.block)
         f.write(str(self.block))
         f.close()
