@@ -46,6 +46,14 @@ New issued political capital = (average vote price)x(care factor)
 
 Now when the new issued political capital is largely due to a high vote price, the new issued political capital is proportional to the average vote price and hence not significantly larger (Passing D). Due to the care factor, new issued political capital will not be as large as the savings made by hoarders and they can, therefore, continue to save compared to those who are spending. Note: everyone will receive the new issued political capital.
 
-## The human issue
+## The Human Issue
 
-Although this model passes all of our criteria, it causes another novel, but not insignificant, issue. That is that the value of political capital will decrease due to the inflationary nature of the model. Although this wouldn't be an issue for computers, this may get confusing for some people as it would be harder to 'gauge' the value of the PC they spend over time.
+Although this model passes all of our criteria, it causes another novel, but not insignificant, issue. That is that the value of political capital will decrease due to the inflationary nature of the model. Although this wouldn't be an issue for computers, this may get confusing for some people as it would be harder to 'gauge' the value of the PC they spend each tine, over time.
+
+To solve this, one proposal is to is to present a different unit in the UI that is calculated from their PC balance such that the value of the UI unit, per capita, is stays consistent as the total volume of PC is increased. This new balance may be calculated via:
+
+```
+UI bal = (Factor)x(PC bal)/(Total PC/number of voters)
+```
+
+Where the Factor will indicate how much of the new unit there will be per capita _for instance Factor = 100_

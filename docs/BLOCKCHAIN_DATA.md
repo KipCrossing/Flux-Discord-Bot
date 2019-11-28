@@ -42,7 +42,31 @@ Depending on the note, the utility of the the first 3 fields varies according to
 
 - **SENDER_ID** - The ID of the voter
 - **RECEIVER_ID** - The ID to the issue, made up of `"server_id-channel_id-message_id"`
-- **TRANSFER_AMOUNT** - 0 - As no PC should be transfered in a simple vote
+- **TRANSFER_AMOUNT** - 0 - As no PC should be transferred in a simple vote
+
+### NOTE = "NO"
+
+- **SENDER_ID** - The ID of the voter
+- **RECEIVER_ID** - The ID to the issue
+- **TRANSFER_AMOUNT** - 0
+
+### NOTE =
+
+- **SENDER_ID** -
+- **RECEIVER_ID** -
+- **TRANSFER_AMOUNT** -
+
+### NOTE =
+
+- **SENDER_ID** -
+- **RECEIVER_ID** -
+- **TRANSFER_AMOUNT** -
+
+### NOTE =
+
+- **SENDER_ID** -
+- **RECEIVER_ID** -
+- **TRANSFER_AMOUNT** -
 
 ### NOTE =
 
