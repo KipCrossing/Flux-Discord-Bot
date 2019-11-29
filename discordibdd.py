@@ -3,6 +3,7 @@ from blockchain import Blockchain, Block
 import discord
 import asyncio
 import ast
+import pandas as pd
 
 DATA_DIR = 'data'
 NEW_DATA = 'new_data.txt'
@@ -38,61 +39,21 @@ class BlockchainManager(object):
             await asyncio.sleep(5)
 
     async def update_block(self, sender, receiver, amount, note):
-        s_bal = await self.get_balance(sender)
-        r_bal = await self.get_balance(receiver)
-        print(s_bal, r_bal, amount)
         try:
-            sender_bal = s_bal - amount
-            receiver_bal = r_bal + amount
-            if sender_bal >= 0:
-                f = open(DATA_DIR + '/' + NEW_DATA, 'a+')
-                # [sender_user_id, receiver_id, transver_amount, sender_new_bal]
-                f.write('["{}","{}","{}","{}","{}","{}"],'.format(
-                    sender, receiver, amount, sender_bal, receiver_bal, note))
-                f.close()
-                return(True)
-            else:
-                return(False)
+            f = open(DATA_DIR + '/' + NEW_DATA, 'a+')
+            f.write('["{}","{}","{}","{}"],'.format(
+                sender, receiver, amount, note))
+            f.close()
+            return(True)
         except Exception as e:
+            print("Fail to write to blockchain: \n", e)
             return(False)
 
-    async def load_balance(self, receiver_id, amount):
-        server_bal = await self.get_balance(self.server_id)
-        f = open(DATA_DIR + '/' + NEW_DATA, 'a+')
-        # [sender_user_id, receiver_id, transver_amount, sender_new_bal]
-        f.write('["{}","{}","{}","{}","{}","{}"],'.format(
-            self.server_id, receiver_id, amount, server_bal, amount, NOTE_LOAD))
-        f.close()
+    async def update_balance(self, blockchain_id):
+        pass
 
     async def get_balance(self, blockchain_id):
-        await self.client.wait_until_ready()
-        server = self.client.get_guild(self.server_id)
-        blockchain_channel = self.client.get_channel(self.blockchain_channel_id)
-        messages = []
-        counter = 0
-        current_bal = None
-        async for message in blockchain_channel.history(limit=None, oldest_first=False):
-            try:
-                data = message.content.split('\n')[2].replace('Block Data: ', '')[:-1]
-                data = '[' + data + ']'
-                data = ast.literal_eval(data)
-                should_break = False
-                for t in data:
-                    if t[0] == str(blockchain_id):
-                        # print(t)
-                        # print('Current bal: {}'.format(t[3]))
-                        current_bal = float(t[3])
-                        should_break = True
-                    elif t[1] == str(blockchain_id):
-                        # print('id here')
-                        current_bal = float(t[4])
-                        should_break = True
-                if should_break:
-                    break
-            except Exception as e:
-                print('Bad data: ', e)
-                current_bal = None
-        return(current_bal)
+        return(0)
 
 
 class IssueManager(object):
@@ -144,7 +105,7 @@ class IssueManager(object):
             data = '[' + data + ']'
             data = ast.literal_eval(data)
             for t in data:
-                if t[1] == self.issue_in_session and t[5] == NOTE_CONVERT:
+                if t[1] == self.issue_in_session and t[3] == NOTE_CONVERT:
                     converts += 1
                     convert_ids.append(t[0])
         return(converts, convert_ids)

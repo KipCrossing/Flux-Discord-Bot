@@ -55,26 +55,6 @@ async def on_ready():
     print(user)
 
 
-@client.event
-async def on_message(message):
-    # print("message.author: " + str(message.author) + "con: "+message.content[:10])
-    try:
-        if message.author.id == FLUX_BOT_ID and message.content[:10] == "**Vote: **":
-            for emoji in ibdd_emojis:
-                await message.add_reaction(emoji)
-        if message.author.id == FLUX_BOT_ID and message.content[:8] == "You will":
-            # print("YOU WILLL")
-            for emoji in ibdd_emojis[:2]:
-                await message.add_reaction(emoji)
-        if message.author.id == FLUX_BOT_ID and message.content[:8] == "Amount t":
-            for emoji in ibdd_emojis[:2]:
-                await message.add_reaction(emoji)
-
-    except Exception as e:
-        print('Fail\n\n{}\n\n'.format(e))
-
-    await client.process_commands(message)
-
 # write message
 @client.command(pass_context=True)
 async def IBDD(ctx, *args):
@@ -90,16 +70,18 @@ async def IBDD(ctx, *args):
     elif len(args) == 1:
         if not issue_man.issue_in_session:
             issue_id = str(server_id) + '-' + str(channel_id) + '-' + str(message_id)
-            await bm.load_balance(issue_id, 0)
+            await bm.update_block(server_id, issue_id, 0, NOTE_LOAD)
             print(args[0])
             issue_man.issue_in_session = issue_id
             client.loop.create_task(issue_man.issue_timer())
             for member in server.members:
                 dont_send = ['Flux Bot#8753', 'Flux Projects#3812',
-                             'XertroV#9931', 'Aus Bills#3405', ' deathlist8#3249']
+                             'XertroV#9931', 'Aus Bills#3405', 'deathlist8#3249']
                 if not str(member) in dont_send:
                     print('name: {}'.format(member))
-                    await member.send('**Vote: **' + str(args[0])+'\n:ballot_box_with_check: YES \n:negative_squared_cross_mark: NO \n:gem: Convert vote to Political Capital \n:bar_chart:  Trade Political Capital for share in vote\n`{}`'.format(issue_id))
+                    reply_message = await member.send('**Vote: **' + str(args[0])+'\n:ballot_box_with_check: YES \n:negative_squared_cross_mark: NO \n:gem: Convert vote to Political Capital \n:bar_chart:  Trade Political Capital for share in vote\n`{}`'.format(issue_id))
+                    for emoji in ibdd_emojis:
+                        await reply_message.add_reaction(emoji)
             await ctx.send('**Vote for** *{}*  **will end in 2 mins**'.format(args[0]))
         else:
             await ctx.send("Another vote is in session")
@@ -120,7 +102,9 @@ async def use(ctx, *args):
     if float(bal) - use_amount < 0:
         block_check = False
     if block_check:
-        await ctx.send("Amount to use: \n`{}`\n How do you want to vote\n`{}`".format(use_amount, issue_id))
+        reply_message = await ctx.send("Amount to use: \n`{}`\n How do you want to vote\n`{}`".format(use_amount, issue_id))
+        for emoji in ibdd_emojis[:2]:
+            await reply_message.add_reaction(emoji)
     else:
         await ctx.send("**You do not have enough balance.** Current balance: `{}`".format(current_bal))
 
@@ -131,16 +115,14 @@ async def mybal(ctx):
     user = ctx.message.author.id
     bal = await bm.get_balance(user)
     print(user, bal)
-
     await channel.send('Your bal: `{}`'.format(bal))
 
 # Delete messages
 @client.command(pass_context=True)
 async def clear(ctx, amount=100):
-    if str(ctx.message.author) == 'KipDawgz#8789':
+    if ctx.message.id == USER_ME_ID:
         channel = ctx.message.channel
         messages = []
-        counter = 0
         async for message in channel.history(limit=100):
             messages.append(message)
         await channel.delete_messages(messages)
@@ -153,7 +135,6 @@ async def on_reaction_add(reaction, user):
     if str(user.name) != 'Flux Bot':
         # print(reaction.emoji, user.name)
         if message.content[:10] == "**Vote: **":
-
             issue_id = message.content.split('\n')[-1].replace('`', '')
             issue_message = await issue_man.get_issue(issue_id)
             if reaction.emoji == ibdd_emojis[0]:
@@ -195,13 +176,5 @@ async def on_reaction_add(reaction, user):
             await user.send('You used {} PC to vote {} {} for the issue \n*"{}"*\nYour current balance is **{} PC**'.format(used, the_vote, reaction.emoji, issue_message, new_bal))
 
 
-# # assign Roles
-# @client.event
-# async def on_member_join(member):
-#     role = discord.utils.get(member.guild.roles, name=VOTER)
-#     await member.add_roles(role)
-
-
-# Background task
 client.loop.create_task(bm.update_blockchain())
 client.run(TOKEN)

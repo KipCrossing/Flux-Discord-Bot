@@ -70,7 +70,6 @@ class Blockchain:
         # f.write(str(self.block))
         # f.close()
         f = open(lbf, 'w')
-        print(self.block)
         f.write(str(self.block))
         f.close()
 

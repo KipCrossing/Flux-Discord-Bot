@@ -56,4 +56,4 @@ To solve this, one proposal is to is to present a different unit in the UI that 
 UI bal = (Factor)x(PC bal)/(Total PC/number of voters)
 ```
 
-Where the Factor will indicate how much of the new unit there will be per capita _for instance Factor = 100_
+Where the Factor will indicate how much of the new unit there will be per capita; _for instance Factor = 100_
