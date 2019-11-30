@@ -70,10 +70,9 @@ async def IBDD(ctx, *args):
     elif len(args) == 1:
         if not issue_man.issue_in_session:
             issue_id = str(server_id) + '-' + str(channel_id) + '-' + str(message_id)
-            await bm.update_block(server_id, issue_id, 0, NOTE_LOAD)
+
             print(args[0])
-            issue_man.issue_in_session = issue_id
-            client.loop.create_task(issue_man.issue_timer())
+            client.loop.create_task(issue_man.issue_timer(issue_id))
             for member in server.members:
                 dont_send = ['Flux Bot#8753', 'Flux Projects#3812',
                              'XertroV#9931', 'Aus Bills#3405', 'deathlist8#3249']
@@ -106,7 +105,7 @@ async def use(ctx, *args):
         for emoji in ibdd_emojis[:2]:
             await reply_message.add_reaction(emoji)
     else:
-        await ctx.send("**You do not have enough balance.** Current balance: `{}`".format(current_bal))
+        await ctx.send("**You do not have enough balance.** Current balance: `{}`".format(bal))
 
 
 @client.command(pass_context=True)
