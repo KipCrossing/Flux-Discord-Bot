@@ -90,22 +90,32 @@ async def IBDD(ctx, *args):
 
 @client.command()
 async def use(ctx, *args):
-    use_amount = float(args[0])
-    issue_id = issue_man.issue_in_session
-    server_id = 551999201714634752
-    issue_message = await issue_man.get_issue(issue_id)
-    user = ctx.message.author.id
-    print(issue_message)
-    bal = await bm.get_balance(user)
-    block_check = True
-    if float(bal) - use_amount < 0:
-        block_check = False
-    if block_check:
-        reply_message = await ctx.send("Amount to use: \n`{}`\n How do you want to vote\n`{}`".format(use_amount, issue_id))
-        for emoji in ibdd_emojis[:2]:
-            await reply_message.add_reaction(emoji)
+    if issue_man.issue_in_session:
+        if len(args) == 1:
+            try:
+                use_amount = float(args[0])
+                issue_id = issue_man.issue_in_session
+                server_id = SERVER_ID
+                issue_message = await issue_man.get_issue(issue_id)
+                user = ctx.message.author.id
+                print(issue_message)
+                bal = await bm.get_balance(user)
+                block_check = True
+                if float(bal) - use_amount < 0:
+                    block_check = False
+                if block_check:
+                    reply_message = await ctx.send("Amount to use: \n`{}`\n How do you want to vote\n`{}`".format(use_amount, issue_id))
+                    for emoji in ibdd_emojis[:2]:
+                        await reply_message.add_reaction(emoji)
+                else:
+                    await ctx.send("**You do not have enough balance.** Current balance: `{}`".format(bal))
+            except Exception as e:
+                print(e)
+                await ctx.send("*Invalid input*")
+        else:
+            await ctx.send("*Invalid input. Too many args*")
     else:
-        await ctx.send("**You do not have enough balance.** Current balance: `{}`".format(bal))
+        await ctx.send("*No issue in session*")
 
 
 @client.command(pass_context=True)
