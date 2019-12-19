@@ -218,4 +218,4 @@ class IssueManager(object):
         (text_result, yes, no) = await self.get_results()
         self.issue_in_session = False
         await channel.send("Vote finished*\n**RESULT:** {} with {} in favor and {} against".format(text_result, yes, no))
-        await channel.send("Use command `!mybal` to check you new valance ")
+        await channel.send("Use command `!mybal` to check your new balance ")
