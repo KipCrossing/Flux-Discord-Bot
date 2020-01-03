@@ -209,7 +209,7 @@ class IssueManager(object):
         await self.bm.update_block(self.issue_in_session, self.server_id, 0, NOTE_START)
         server = self.client.get_guild(id=self.server_id)
         channel = self.client.get_channel(self.commands_channel_id)
-        # await asyncio.sleep(60*1)
+        await asyncio.sleep(60*1)
         await channel.send("**1 min** remaining...")
         await asyncio.sleep(60*1)
         await self.bm.update_block(self.issue_in_session, self.server_id, 0, NOTE_END)
