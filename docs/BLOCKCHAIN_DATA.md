@@ -1,13 +1,11 @@
 # Blockchain data
 
-_This section is under CONSTRUCTION_
+This is an explanation of how the Block-chain is setup and the Data that is contained within each block. 
 
-This is an explination of
-
-The contense of the block include:
+The content of the block include:
 
 - **Block Hash** - Calculated (see below))
-- **BlockNo** - The number of the block, Itteraied starting at 1
+- **BlockNo** - The number of the block, Iterated starting at 1
 - **Block Data** - The voting data (see below)
 - **Nonce** - Number of attempts during mining
 - **Timestamp** - The time the block was created
@@ -43,35 +41,47 @@ Depending on the note, the utility of the the first 3 fields varies according to
 ### NOTE = "YES"
 
 - **SENDER_ID** - The ID of the voter
-- **RECEIVER_ID** - The ID to the issue, made up of `"server_id-channel_id-message_id"`
+- **RECEIVER_ID** - The ID of the issue, made up of `"server_id-channel_id-message_id"`
 - **TRANSFER_AMOUNT** - 0 - As no PC should be transferred in a simple vote
 
 ### NOTE = "NO"
 
 - **SENDER_ID** - The ID of the voter
-- **RECEIVER_ID** - The ID to the issue
+- **RECEIVER_ID** - The ID of the issue, made up of `"server_id-channel_id-message_id"`
 - **TRANSFER_AMOUNT** - 0
 
-### NOTE =
+### NOTE = "CONVERT"
+
+- **SENDER_ID** - The ID of the voter
+- **RECEIVER_ID** - The ID of the issue, made up of `"server_id-channel_id-message_id"`
+- **TRANSFER_AMOUNT** - 0
+
+### NOTE = "TRANSFER"
+
+- **SENDER_ID** - The ID of the Server
+- **RECEIVER_ID** - The ID of the voter
+- **TRANSFER_AMOUNT** - Amount of PC to transfer
+
+### NOTE = "Y-`server_id-channel_id-message_id`
 
 - **SENDER_ID** -
-- **RECEIVER_ID** -
-- **TRANSFER_AMOUNT** -
+- **RECEIVER_ID** - The ID of the Server
+- **TRANSFER_AMOUNT** - Amount of PC to transfer
 
-### NOTE =
+### NOTE = "N-`server_id-channel_id-message_id`
 
-- **SENDER_ID** -
-- **RECEIVER_ID** -
-- **TRANSFER_AMOUNT** -
+- **SENDER_ID** - The ID of the voter
+- **RECEIVER_ID** - The ID of the Server
+- **TRANSFER_AMOUNT** - Amount of PC to transfer
 
-### NOTE =
+### NOTE = "START"
 
-- **SENDER_ID** -
-- **RECEIVER_ID** -
-- **TRANSFER_AMOUNT** -
+- **SENDER_ID** - The ID of the issue, made up of `"server_id-channel_id-message_id"`
+- **RECEIVER_ID** - The ID of the Server
+- **TRANSFER_AMOUNT** - 0
 
-### NOTE =
+### NOTE = "END"
 
-- **SENDER_ID** -
-- **RECEIVER_ID** -
-- **TRANSFER_AMOUNT** -
+- **SENDER_ID** - The ID of the issue, made up of `"server_id-channel_id-message_id"`
+- **RECEIVER_ID** - The ID of the Server
+- **TRANSFER_AMOUNT** - 0
